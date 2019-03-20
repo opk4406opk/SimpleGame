@@ -14,6 +14,9 @@ void AInGameMode::StartPlay()
 	Super::StartPlay();
 	UE_LOG(LogTemp, Warning, TEXT("AInGameMode::StartPlay"));
 	//
-	GamePlayer.LoadSynchronous();
-	GamePlayerInstance = GetWorld()->SpawnActor<AGamePlayer>(GamePlayer->GetClass(), FVector(0, 0, 0), FRotator(0, 0, 0));
+	GamePlayerCharacter.LoadSynchronous();
+	GamePlayerInstance = GetWorld()->SpawnActor<AGamePlayerCharacter>(GamePlayerCharacter->GetClass(), FVector(0, 0, 0), FRotator(0, 0, 0));
+#if UE_EDITOR
+	GamePlayerInstance->SetActorLabel(FString("GamePlayerCharacter_Instance"));
+#endif
 }

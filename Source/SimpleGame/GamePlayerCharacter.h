@@ -3,20 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
-#include "Runtime/Engine/Classes/Components/SkeletalMeshComponent.h"
-#include "GamePlayer.generated.h"
+#include "GameFramework/Character.h"
+#include "GamePlayerCharacter.generated.h"
 
 UCLASS()
-class SIMPLEGAME_API AGamePlayer : public APawn
+class SIMPLEGAME_API AGamePlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
-	AGamePlayer();
-public:
-	
+	// Sets default values for this character's properties
+	AGamePlayerCharacter();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -27,6 +25,5 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-private:
-	UPROPERTY(Transient) USkeletalMeshComponent* SkeletalMeshComponenet;
+
 };

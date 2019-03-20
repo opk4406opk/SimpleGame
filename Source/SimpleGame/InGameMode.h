@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SimpleGameGameModeBase.h"
-#include "SimpleGame/GamePlayer.h"
+#include "SimpleGame/GamePlayerCharacter.h"
 #include "InGameMode.generated.h"
 
 /**
@@ -19,8 +19,8 @@ public:
 	virtual void StartPlay() override;
 public:
 	UPROPERTY(EditDefaultsOnly)
-	TSoftClassPtr<AGamePlayer> GamePlayer;
+	TSoftClassPtr<AGamePlayerCharacter> GamePlayerCharacter;
 private:
 	UPROPERTY()
-	AGamePlayer* GamePlayerInstance;
+	AGamePlayerCharacter* GamePlayerInstance;
 };
