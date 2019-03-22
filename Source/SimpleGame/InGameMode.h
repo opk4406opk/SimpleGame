@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "SimpleGameGameModeBase.h"
 #include "SimpleGame/GamePlayerCharacter.h"
+#include "Enums.h"
 #include "InGameMode.generated.h"
 
 /**
@@ -17,6 +18,8 @@ class SIMPLEGAME_API AInGameMode : public ASimpleGameGameModeBase
 public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual void StartPlay() override;
+
+	UFUNCTION(Exec) void TestAAMethod(EGameAntialiasingMethod methodType);
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSoftClassPtr<AGamePlayerCharacter> GamePlayerCharacter;
