@@ -26,4 +26,12 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+private:
+	void MoveTouchPadX(float x);
+	void MoveTouchPadY(float y);
+	//
+	void RotationTouchPadX(float x);
+	void RotationOtuchPadY(float y);
+
+	FRotator LatestTouchRotation;
 };

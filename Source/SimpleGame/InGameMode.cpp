@@ -2,27 +2,35 @@
 
 #include "InGameMode.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
+#include "Runtime/Engine/Classes/Engine/Engine.h"
 
 void AInGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
-	UE_LOG(LogTemp, Warning, TEXT("AInGameMode::InitGame"));
+	UE_LOG(LogTemp, Display, TEXT("AInGameMode::InitGame"));
 }
 
 void AInGameMode::StartPlay()
 {
 	Super::StartPlay();
-	UE_LOG(LogTemp, Warning, TEXT("AInGameMode::StartPlay"));
-	//
-	GamePlayerCharacter.LoadSynchronous();
-	GamePlayerInstance = GetWorld()->SpawnActor<AGamePlayerCharacter>(GamePlayerCharacter->GetClass(), FVector(0, 0, 0), FRotator(0, 0, 0));
+	UE_LOG(LogTemp, Display, TEXT("AInGameMode::StartPlay"));
+	/*UClass* playerClass = GamePlayerCharacter.LoadSynchronous();
+	if (playerClass != nullptr)
+	{
+		GamePlayerInstance = GetWorld()->SpawnActor<AGamePlayerCharacter>(playerClass, FVector(0, 0, 0), FRotator(0, 0, 0));
 #if UE_EDITOR
-	GamePlayerInstance->SetActorLabel(*FString("GamePlayerCharacter_Instance"));
+		GamePlayerInstance->SetActorLabel(*FString("GamePlayerCharacter_Instance"));
 #endif
+	}*/
 }
 
 void AInGameMode::TestAAMethod(EGameAntialiasingMethod methodType)
 {
+	if (GEngine)
+	{
+		GEngine->ClearOnScreenDebugMessages();
+		GEngine->AddOnScreenDebugMessage(-1, 9999.0f, FColor::Red, FString("AInGameMode::TestAAMethod"));
+	}
 	//test - AA 퀼리티값 4(시네마틱)으로 설정 ( 테스트용도로..)
 	IConsoleManager::Get().FindConsoleVariable(TEXT("sg.AntiAliasingQuality"))->Set(4.0f);
 	//
@@ -50,13 +58,7 @@ void AInGameMode::TestAAMethod(EGameAntialiasingMethod methodType)
 		IConsoleManager::Get().FindConsoleVariable(TEXT("r.PostProcessAAQuality"))->Set(4.0f);
 		break;
 	case EGameAntialiasingMethod::MSAA:
-		EGameMSAASamplingValue hardwareSampleValue = GetSSGameInstance()->GetSavedData()->MSAASampling;
-		if (hardwareSampleValue == EGameMSAASamplingValue::MSAA_Disabled || hardwareSampleValue == EGameMSAASamplingValue::MSAA_Disabled_And_TemrpoalAA_Enabled)
-		{
-			// 디바이스 하드웨어에서 MSAA를 지원하지 않는경우 별도의 메세지 출력?
-			return;
-		}
-		//
+		EGameMSAASamplingValue hardwareSampleValue = EGameMSAASamplingValue::MSAA_4x;
 		float setValue = 0.0f;
 		switch (hardwareSampleValue)
 		{
@@ -75,7 +77,6 @@ void AInGameMode::TestAAMethod(EGameAntialiasingMethod methodType)
 		IConsoleManager::Get().FindConsoleVariable(TEXT("r.msaacount"))->Set(setValue);
 		IConsoleManager::Get().FindConsoleVariable(TEXT("r.mobilemsaa"))->Set(setValue);
 		IConsoleManager::Get().FindConsoleVariable(TEXT("r.PostProcessAAQuality"))->Set(5.0f);
-		break;
 		break;
 	}
 	IConsoleVariable* antialiasingMethod = IConsoleManager::Get().FindConsoleVariable(TEXT("r.DefaultFeature.AntiAliasing"));

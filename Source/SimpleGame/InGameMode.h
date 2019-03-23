@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "SimpleGameGameModeBase.h"
 #include "SimpleGame/GamePlayerCharacter.h"
+#include "SimpleGame/GamePlayerController.h"
+#include "SimpleGame/GamePlayerCameraManager.h"
 #include "Enums.h"
 #include "InGameMode.generated.h"
 
@@ -23,7 +25,9 @@ public:
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSoftClassPtr<AGamePlayerCharacter> GamePlayerCharacter;
+
 private:
 	UPROPERTY()
 	AGamePlayerCharacter* GamePlayerInstance;
+
 };
