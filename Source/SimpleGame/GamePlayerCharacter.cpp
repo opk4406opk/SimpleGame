@@ -16,6 +16,7 @@ void AGamePlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::BeginPlay"));
+	CameraComponent = Cast<UCameraComponent>(GetComponentByClass(UCameraComponent::StaticClass()));
 }
 
 // Called every frame
@@ -23,7 +24,7 @@ void AGamePlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	FRotator curRotation = GetActorRotation();
-	SetActorRotation(curRotation + LatestTouchRotation);
+	SetActorRotation(curRotation + LatestTouchRotation * RotateSpeed);
 }
 
 // Called to bind functionality to input
@@ -55,12 +56,13 @@ void AGamePlayerCharacter::MoveTouchPadY(float y)
 void AGamePlayerCharacter::RotationTouchPadX(float x)
 {
 	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationTouchPadX : %f"), x);
-	LatestTouchRotation.Roll = x;
+	LatestTouchRotation.Yaw = x;
 }
 
 void AGamePlayerCharacter::RotationOtuchPadY(float y)
 {
 	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationOtuchPadY : %f"), y);
-	LatestTouchRotation.Yaw = y;
+	//LatestTouchRotation.Roll = y;
+	CameraComponent->AddRelativeRotation(FRotator(y, 0.0f, 0.0f));
 }
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "GamePlayerCharacter.generated.h"
 
 UCLASS()
@@ -25,6 +26,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+public:
+	
+
 
 private:
 	void MoveTouchPadX(float x);
@@ -33,5 +37,10 @@ private:
 	void RotationTouchPadX(float x);
 	void RotationOtuchPadY(float y);
 
+private:
 	FRotator LatestTouchRotation;
+	float RotateSpeed = 3.0f;
+
+	UPROPERTY()
+	UCameraComponent* CameraComponent;
 };
