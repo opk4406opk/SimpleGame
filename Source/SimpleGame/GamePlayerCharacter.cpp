@@ -41,7 +41,7 @@ void AGamePlayerCharacter::MoveTouchPadX(float x)
 {
 	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::MoveTouchPadX : %f"), x);
 	FVector curLoc = GetActorLocation();
-	curLoc.X -= x;
+	curLoc.X -= x * MoveSpeed;
 	SetActorLocation(curLoc);
 }
 
@@ -49,7 +49,7 @@ void AGamePlayerCharacter::MoveTouchPadY(float y)
 {
 	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::MoveTouchPadY : %f"), y);
 	FVector curLoc = GetActorLocation();
-	curLoc.Y += y;
+	curLoc.Y += y * MoveSpeed;
 	SetActorLocation(curLoc);
 }
 

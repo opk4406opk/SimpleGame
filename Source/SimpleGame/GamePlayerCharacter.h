@@ -40,6 +40,7 @@ private:
 private:
 	FRotator LatestTouchRotation;
 	float RotateSpeed = 3.0f;
+	float MoveSpeed = 3.0f;
 
 	UPROPERTY()
 	UCameraComponent* CameraComponent;
