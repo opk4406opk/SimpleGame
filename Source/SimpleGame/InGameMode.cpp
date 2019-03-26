@@ -33,14 +33,13 @@ void AInGameMode::TestAAMethod(EGameAntialiasingMethod methodType)
 	}
 	//test - AA 퀼리티값 4(시네마틱)으로 설정 ( 테스트용도로..)
 	IConsoleManager::Get().FindConsoleVariable(TEXT("sg.AntiAliasingQuality"))->Set(4.0f);
-	//
-	IConsoleManager::Get().FindConsoleVariable(TEXT("r.PostProcessAAQuality"))->Set(0.0f);
-	IConsoleManager::Get().FindConsoleVariable(TEXT("r.mobilemsaa"))->Set(1.0f);
-	IConsoleManager::Get().FindConsoleVariable(TEXT("r.msaacount"))->Set(1.0f);
 	switch (methodType)
 	{
 	case EGameAntialiasingMethod::Off:
 		IConsoleManager::Get().FindConsoleVariable(TEXT("sg.AntiAliasingQuality"))->Set(0.0f);
+		IConsoleManager::Get().FindConsoleVariable(TEXT("r.PostProcessAAQuality"))->Set(0.0f);
+		IConsoleManager::Get().FindConsoleVariable(TEXT("r.mobilemsaa"))->Set(1.0f);
+		IConsoleManager::Get().FindConsoleVariable(TEXT("r.msaacount"))->Set(1.0f);
 		break;
 	case EGameAntialiasingMethod::FXAA:
 		IConsoleManager::Get().FindConsoleVariable(TEXT("r.PostProcessAAQuality"))->Set(6.0f);
