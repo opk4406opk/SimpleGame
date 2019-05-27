@@ -8,6 +8,7 @@ AGamePlayerCharacter::AGamePlayerCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	//RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
 
 }
 
@@ -17,14 +18,18 @@ void AGamePlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::BeginPlay"));
 	CameraComponent = Cast<UCameraComponent>(GetComponentByClass(UCameraComponent::StaticClass()));
+
+	
 }
 
 // Called every frame
 void AGamePlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FRotator curRotation = GetActorRotation();
-	SetActorRotation(curRotation + LatestTouchRotation * RotateSpeed);
+	//FRotator curRotation = GetActorRotation();
+	//SetActorRotation(curRotation + LatestTouchRotation * RotateSpeed);
+	//
+	OrbitRotation();
 }
 
 // Called to bind functionality to input
@@ -63,6 +68,24 @@ void AGamePlayerCharacter::RotationOtuchPadY(float y)
 {
 	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationOtuchPadY : %f"), y);
 	//LatestTouchRotation.Roll = y;
+	if (CameraComponent == nullptr) return;
 	CameraComponent->AddRelativeRotation(FRotator(y, 0.0f, 0.0f));
+}
+
+void AGamePlayerCharacter::OrbitRotation()
+{
+	if (IsValid(TargetActor) == true)
+	{
+		FVector InitPlayerWorldLocation = GetActorLocation();
+
+		//FVector TargetToPlayerDirection = InitPlayerWorldLocation - TargetActor->GetActorLocation();
+		//TargetToPlayerDirection.Normalize();
+		FVector PlayerToTargetDirection = TargetActor->GetActorLocation() - InitPlayerWorldLocation;
+		PlayerToTargetDirection.Normalize();
+		const FVector RotatedVector = PlayerOrbitRotator.RotateVector(PlayerToTargetDirection * OrbitRotateSpeed);
+		const FVector newWorldLocation = InitPlayerWorldLocation + RotatedVector;
+		SetActorLocation(newWorldLocation);
+		//SetActorRotation((TargetActor->GetActorLocation() - newWorldLocation).Rotation());
+	}
 }
 

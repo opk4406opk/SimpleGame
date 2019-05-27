@@ -27,9 +27,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 public:
-	
-
-
+	UPROPERTY(EditAnywhere)
+	AActor* TargetActor;
+	UPROPERTY(EditAnywhere)
+	FRotator TargetActorRotator;
+	UPROPERTY(EditAnywhere)
+	FRotator PlayerOrbitRotator;
+	UPROPERTY(EditAnywhere)
+	float OrbitRotateSpeed = 100.0f;
 private:
 	void MoveTouchPadX(float x);
 	void MoveTouchPadY(float y);
@@ -37,11 +42,13 @@ private:
 	void RotationTouchPadX(float x);
 	void RotationOtuchPadY(float y);
 
+	//
+	void OrbitRotation();
+
 private:
 	FRotator LatestTouchRotation;
 	float RotateSpeed = 3.0f;
 	float MoveSpeed = 3.0f;
-
 	UPROPERTY()
 	UCameraComponent* CameraComponent;
 };
