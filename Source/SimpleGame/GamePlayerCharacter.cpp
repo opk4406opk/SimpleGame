@@ -2,7 +2,7 @@
 
 #include "GamePlayerCharacter.h"
 #include "Runtime/Engine/Classes/Components/InputComponent.h"
-
+#include "Runtime/Engine/Classes/Components/SkeletalMeshComponent.h"
 // Sets default values
 AGamePlayerCharacter::AGamePlayerCharacter()
 {
@@ -18,8 +18,10 @@ void AGamePlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::BeginPlay"));
 	CameraComponent = Cast<UCameraComponent>(GetComponentByClass(UCameraComponent::StaticClass()));
-
+	MeshComponent = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
 	
+	auto ditheringMaterial = MeshComponent->GetMaterial(2);
+	MeshComponent->SetMaterial(0, ditheringMaterial);
 }
 
 // Called every frame

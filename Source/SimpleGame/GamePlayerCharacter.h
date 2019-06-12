@@ -49,6 +49,8 @@ private:
 	FRotator LatestTouchRotation;
 	float RotateSpeed = 3.0f;
 	float MoveSpeed = 3.0f;
-	UPROPERTY()
+	UPROPERTY(Transient)
 	UCameraComponent* CameraComponent;
+	UPROPERTY(Transient)
+	USkeletalMeshComponent* MeshComponent;
 };
