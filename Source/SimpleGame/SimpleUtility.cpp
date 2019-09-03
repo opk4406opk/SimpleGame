@@ -2,32 +2,15 @@
 
 using namespace PathfindingAlgorithm;
 
-FPathFinderAStar::FPathFinderAStar()
-{
-}
-
-
-FPathFinderAStar::~FPathFinderAStar()
-{
-}
-
-bool PathfindingAlgorithm::FPathFinderAStar::Pathfinding(TArray<int32>& navigateList, int32 startIndex, int32 goalIndex)
+bool FPathFinderAStar::Pathfinding(TArray<int32>& navigateList, int32 startIndex, int32 goalIndex)
 {
 	InitPathFinding();
-	// 초기화후, 장애물 설정.
-	// to do here..
 	//
-	//goalNode = MakeShareable<FAstarPathNode>(pathMap[(int32)goal.X][(int32)goal.Y].Get());
-	//goalNode->bGoalNode = true;
-	////
-	//curNode = MakeShareable<FAstarPathNode>(pathMap[(int32)start.X][(int32)start.Y].Get());
-	//curNode->SetParentNode(nullptr);
-	//curNode->CalcHValue(goalNode.Get());
-	while ((OpenList.Num() != 0) && (!IsGoalInOpenList()))
+	while ((OpenList.Num() != 0) && (IsGoalInOpenList() == false))
 	{
-		SetOpenList();
-		FAstarPathNode* selectNode = SelectLowCostPath();
-		if (selectNode != nullptr)
+		SettingOpenList();
+		TSharedPtr<FAstarPathNode> selectNode = SelectLowCostPath();
+		if (selectNode.Get() != nullptr)
 		{
 			SearchAdjacentNodes(selectNode);
 		}
@@ -38,38 +21,29 @@ bool PathfindingAlgorithm::FPathFinderAStar::Pathfinding(TArray<int32>& navigate
 // 길찾기 전에 호출되어 초기화를 진행합니다.
 void FPathFinderAStar::InitPathFinding()
 {
-	OpenList.Empty();
-	ClosedList.Empty();
-	// 맵 트리 해제.
-	ReleasePathNode(RootNode.Get());
-	RootNode.Reset();
-	CurrentNode.Reset();
-	GoalNode.Reset();
-
-	// 링크드 리스트를 구성. ( = 맵 노드들을 구성한다(트리형태).
-	//
-	// to do here.... 
-	// 시작점은 Current Node, 목표지점은 Goal Node로 설정된다. 
-	// 시작점인 Current Node는 OpenList에 추가되어야 함.
-	// 갈수없는 지점은 ClosedList에 추가되어야 함.
-	
-	// 출격 테이블 데이터가 리스트 형태로 들어온다면
-	// 첫번째 Row의 데이터를 이용해
-	// TSharedPtr<FAstarPathNode> root = MakeShared<FAstarPathNode>();
-	// ~> 링크들의 Code값들을 root->SoritePathNodeInfo.PathLinkCodes[MAX_ADJACENT] 에 할당.
-	// RootNode = root;
-	// MakePathNode(root);
-	
-
-	OpenList.Add(CurrentNode.Get());
+	// 사용했던 노드들을 모두 릴리즈한다.
+	ReleaseAllData();
+	// 1. Path tree 구성
+	// 2. Path tree를 순회하며 장애물 설정 ( setting closed list )
+	RootNode = MakeShared<FAstarPathNode>();
+	RootNode->SetNodePosition(FVector2D(0, 0));
+	// 맵 트리 구성.
+	MakePathNodesRecursive(RootNode);
+	InitalizeVisitedFlag();
+	// 장애물 설정.
+	MakeObstaclePathNodesRecursive(RootNode);
+	InitalizeVisitedFlag();
+	OpenList.Add(TraverseNode);
 }
 
 void FPathFinderAStar::CurNodeToClosedList()
 {
-	ClosedList.Add(CurrentNode.Get());
-	for (FAstarPathNode* pathNode : OpenList)
+	ClosedList.Add(TraverseNode);
+	for (TWeakPtr<FAstarPathNode> pathNode : OpenList)
 	{
-		if (pathNode->GetPosition() == CurrentNode->GetPosition())
+		if (pathNode.Pin().IsValid() == false) continue;
+
+		if (pathNode.Pin()->GetNodePosition() == TraverseNode.Pin()->GetNodePosition())
 		{
 			OpenList.Remove(pathNode);
 			break;
@@ -77,26 +51,34 @@ void FPathFinderAStar::CurNodeToClosedList()
 	}
 }
 
-bool FPathFinderAStar::IsInClosedList(int searchPosX, int searchPosY)
+bool FPathFinderAStar::IsInClosedList(FVector2D searchPos)
 {
 	bool bFind = false;
-	for(auto node : ClosedList)
+	for (TWeakPtr<FAstarPathNode> node : ClosedList)
 	{
-		if ((node->GetPosition().X == searchPosX) &&
-			(node->GetPosition().Y == searchPosY))
+		if (node.Pin().IsValid() == false) continue;
+
+		if ((node.Pin()->GetNodePosition().X == searchPos.X) &&
+			(node.Pin()->GetNodePosition().Y == searchPos.Y))
+		{
 			bFind = true;
+		}
 	}
 	return bFind;
 }
 
-bool FPathFinderAStar::IsInOpenList(int searchPosX, int searchPosY)
+bool FPathFinderAStar::IsInOpenList(FVector2D searchPos)
 {
 	bool bFind = false;
-	for(auto node : OpenList)
+	for (TWeakPtr<FAstarPathNode> node : OpenList)
 	{
-		if ((node->GetPosition().X == searchPosX) &&
-			(node->GetPosition().Y == searchPosY))
+		if (node.Pin().IsValid() == false) continue;
+
+		if ((node.Pin()->GetNodePosition().X == searchPos.X) &&
+			(node.Pin()->GetNodePosition().Y == searchPos.Y))
+		{
 			bFind = true;
+		}
 	}
 	return bFind;
 }
@@ -104,9 +86,9 @@ bool FPathFinderAStar::IsInOpenList(int searchPosX, int searchPosY)
 bool FPathFinderAStar::IsGoalInOpenList()
 {
 	bool bFind = false;
-	for(auto node : OpenList)
+	for (TWeakPtr<FAstarPathNode> node : OpenList)
 	{
-		if (node->bGoalNode)
+		if (node.Pin().IsValid() == true && node.Pin()->bGoalNode)
 		{
 			bFind = true;
 		}
@@ -114,134 +96,90 @@ bool FPathFinderAStar::IsGoalInOpenList()
 	return bFind;
 }
 
-void FPathFinderAStar::SetOpenList()
+void FPathFinderAStar::SettingOpenList()
 {
-	for (TSharedPtr<FAstarPathNode> adjacentNode : CurrentNode->AdjacentNodes)
+	for (TWeakPtr<FAstarPathNode> adjacentNode : TraverseNode.Pin()->AdjacentNodes)
 	{
 		if (adjacentNode.IsValid() == false) continue;
 
-		if ((IsInClosedList(adjacentNode->GetPosition().X, adjacentNode->GetPosition().Y) == false) &&
-			(IsInOpenList(adjacentNode->GetPosition().X, adjacentNode->GetPosition().Y) == false))
+		if ((IsInClosedList(adjacentNode.Pin()->GetNodePosition()) == false) &&
+			(IsInOpenList(adjacentNode.Pin()->GetNodePosition()) == false))
 		{
-			adjacentNode->SetParentNode(CurrentNode.Get());
-			adjacentNode->CalcHValue(GoalNode.Get());
-			adjacentNode->CalcGValue();
-			OpenList.Add(adjacentNode.Get());
+			adjacentNode.Pin()->SetParentNode(TraverseNode.Pin());
+			adjacentNode.Pin()->CalcHScalarValue(GoalNode.Pin());
+			adjacentNode.Pin()->CalcGScalarValue();
+			OpenList.Add(adjacentNode);
 		}
 	}
-	//
-	/*for(FVector2D pos : fourDir)
-	{
-		int searchPosX = curNode->GetPosition().X + pos.X;
-		int searchPosY = curNode->GetPosition().Y + pos.Y;
-		if ((searchPosX >= 0 && searchPosX < MAP_SIZE_X) && (searchPosY >= 0 && searchPosY < MAP_SIZE_Y))
-		{
-			if ((!IsInClosedList(searchPosX, searchPosY)) && (!IsInOpenList(searchPosX, searchPosY)))
-			{
-				pathMap[searchPosX][searchPosY]->SetParentNode(curNode.Get());
-				pathMap[searchPosX][searchPosY]->CalcHValue(goalNode.Get());
-				pathMap[searchPosX][searchPosY]->CalcGValue();
-				openList.Add(pathMap[searchPosX][searchPosY].Get());
-			}
-		}
-	}*/
 	CurNodeToClosedList();
 }
 
-void FPathFinderAStar::SearchAdjacentNodes(FAstarPathNode * selectNode)
+void FPathFinderAStar::SearchAdjacentNodes(TSharedPtr<FAstarPathNode> selectNode)
 {
-	for (TSharedPtr<FAstarPathNode> adjacentNode : selectNode->AdjacentNodes)
+	for (TWeakPtr<FAstarPathNode> adjacentNode : selectNode->AdjacentNodes)
 	{
 		if (adjacentNode.IsValid() == false) continue;
 
-		if (IsInClosedList(adjacentNode->GetPosition().X, adjacentNode->GetPosition().Y) == false)
+		if (IsInClosedList(adjacentNode.Pin()->GetNodePosition()) == false)
 		{
-			if (IsInOpenList(adjacentNode->GetPosition().X, adjacentNode->GetPosition().Y) == false)
+			if (IsInOpenList(adjacentNode.Pin()->GetNodePosition()) == false)
 			{
-				OpenList.Add(adjacentNode.Get());
-				adjacentNode->SetParentNode(CurrentNode.Get());
-				adjacentNode->CalcHValue(GoalNode.Get());
-				adjacentNode->CalcGValue();
+				OpenList.Add(adjacentNode);
+				adjacentNode.Pin()->SetParentNode(TraverseNode.Pin());
+				adjacentNode.Pin()->CalcHScalarValue(GoalNode.Pin());
+				adjacentNode.Pin()->CalcGScalarValue();
 			}
 			else
 			{
-				if ((adjacentNode->GetGValue() < selectNode->GetGValue()))
+				if ((adjacentNode.Pin()->GetGScalarValue() < selectNode->GetGScalarValue()))
 				{
-					selectNode->SetParentNode(adjacentNode.Get());
-					selectNode->CalcHValue(GoalNode.Get());
-					selectNode->CalcGValue();
+					selectNode->SetParentNode(adjacentNode.Pin());
+					selectNode->CalcHScalarValue(GoalNode.Pin());
+					selectNode->CalcGScalarValue();
 				}
 			}
 		}
 	}
-	//
-	//
-	/*for (FVector2D pos : fourDir)
-	{
-		int searchPosX = selectNode->GetPosition().X;
-		int searchPosY = selectNode->GetPosition().Y;
-		if ((searchPosX >= 0 && searchPosX < MAP_SIZE_X) && (searchPosY >= 0 && searchPosY < MAP_SIZE_Y))
-		{
-			if (!IsInClosedList(searchPosX, searchPosY))
-			{
-				if (!IsInOpenList(searchPosX, searchPosY))
-				{
-					openList.Add(pathMap[searchPosX][searchPosY].Get());
-					pathMap[searchPosX][searchPosY]->SetParentNode(curNode.Get());
-					pathMap[searchPosX][searchPosY]->CalcHValue(goalNode.Get());
-					pathMap[searchPosX][searchPosY]->CalcGValue();
-				}
-				else
-				{
-					if ((pathMap[searchPosX][searchPosY]->GetGValue() < selectNode->GetGValue()))
-					{
-						selectNode->SetParentNode(pathMap[searchPosX][searchPosY].Get());
-						selectNode->CalcHValue(goalNode.Get());
-						selectNode->CalcGValue();
-					}
-				}
-			}
-		}
-	}*/
-	
 }
 
 bool FPathFinderAStar::ExtractNavigatePath(TArray<int32>& navigatePath)
 {
-	FAstarPathNode* path = GoalNode.Get();
-	while (path->GetParentNode() != nullptr)
+	TSharedPtr<FAstarPathNode> path = GoalNode.Pin();
+	while (path->GetParentNode().IsValid() != false)
 	{
-		navigatePath.Add(path->SoritePathNodeInfo.FloorIndex);
+		navigatePath.Add(path->NodeIndex);
 		path = path->GetParentNode();
 	}
 	if (navigatePath.Num() == 0)
 	{
 		return false;
 	}
+	// 목표노드로부터 백트래킹을 한 결과이므로 반대로 정렬해준다.
+	Algo::Reverse(navigatePath);
 	return true;
 }
 
-FAstarPathNode* FPathFinderAStar::SelectLowCostPath()
+TSharedPtr<FAstarPathNode> FPathFinderAStar::SelectLowCostPath()
 {
-	int minCost = 0;
-	FAstarPathNode* lowCostPath = nullptr;
+	int32 minCost = 0;
+	TSharedPtr<FAstarPathNode> lowCostPath = nullptr;
 	if (OpenList.Num() == 0) return nullptr;
 
-	minCost = OpenList[0]->GetGValue() + OpenList[0]->GetHValue();
-	lowCostPath = OpenList[0];
-	for (int i = 1; i < OpenList.Num(); i++)
+	minCost = OpenList[0].Pin()->GetGScalarValue() + OpenList[0].Pin()->GetHScalarValue();
+	lowCostPath = OpenList[0].Pin();
+	for (int32 i = 1; i < OpenList.Num(); i++)
 	{
-		int cost = OpenList[i]->GetGValue() + OpenList[i]->GetHValue();
+		int32 cost = OpenList[i].Pin()->GetGScalarValue() + OpenList[i].Pin()->GetHScalarValue();
 		if (minCost > cost)
 		{
 			minCost = cost;
-			lowCostPath = OpenList[i];
+			lowCostPath = OpenList[i].Pin();
 		}
 	}
 
-	for (FAstarPathNode* pathNode : OpenList)
+	for (TWeakPtr<FAstarPathNode> pathNode : OpenList)
 	{
-		if (pathNode->GetPosition() == lowCostPath->GetPosition())
+		if (pathNode.Pin()->GetNodePosition() == lowCostPath->GetNodePosition())
 		{
 			OpenList.Remove(pathNode);
 			break;
@@ -249,43 +187,166 @@ FAstarPathNode* FPathFinderAStar::SelectLowCostPath()
 	}
 
 	ClosedList.Add(lowCostPath);
-	CurrentNode = MakeShareable<FAstarPathNode>(lowCostPath);
+	TraverseNode = lowCostPath;
 
 	return lowCostPath;
 }
 
-void FPathFinderAStar::MakePathNode(FAstarPathNode* rootNode)
+void FPathFinderAStar::ReleaseAllData()
 {
-	if (rootNode == nullptr) return;
+	// 맵 트리 해제.
+	ReleasePathNodesRecursive(RootNode);
+	//
+	for (TPair<int32, TSharedPtr<FAstarPathNode>> createdNode : CreatedNodes)
+	{
+		if (createdNode.Value.IsValid() == true)
+		{
+			createdNode.Value.Reset();
+		}
+	}
+	CreatedNodes.Empty();
+	//
+	for (TWeakPtr<FAstarPathNode> openNode : OpenList)
+	{
+		if (openNode.Pin().IsValid() == true)
+		{
+			openNode.Reset();
+		}
+	}
+	OpenList.Empty();
+	//
+	for (TWeakPtr<FAstarPathNode> closedNode : ClosedList)
+	{
+		if (closedNode.Pin().IsValid() == true)
+		{
+			closedNode.Reset();
+		}
+	}
+	ClosedList.Empty();
+	//
+	//
+	if (RootNode.IsValid() == true)
+	{
+		RootNode.Reset();
+	}
+	//
+	if (TraverseNode.IsValid() == true)
+	{
+		TraverseNode.Reset();
+	}
+	//
+	if (GoalNode.IsValid() == true)
+	{
+		GoalNode.Reset();
+	}
+}
 
+void FPathFinderAStar::InitalizeVisitedFlag()
+{
+	for (TPair<int32, TSharedPtr<FAstarPathNode>> node : CreatedNodes)
+	{
+		node.Value->bVisited = false;
+	}
+}
+
+
+void FPathFinderAStar::MakePathNodesRecursive(TSharedPtr<FAstarPathNode> rootNode)
+{
+	// base case.
+	if (rootNode.IsValid() == false) return;
+	if (rootNode->bVisited == true) return;
+	rootNode->bVisited = true;
+
+	if (rootNode->NodeIndex == StartFloorID)
+	{
+		rootNode->bStartNode = true;
+		TraverseNode = rootNode;
+	}
+	else if (rootNode->NodeIndex == GoalFloorID)
+	{
+		rootNode->bGoalNode = true;
+		GoalNode = rootNode;
+	}
+
+	// 주변 노드를 생성.
 	for (int32 loop = 0; loop < MAX_ADJACENT; loop++)
 	{
-		if (rootNode->AdjacentNodes[loop].IsValid() == false && rootNode->SoritePathNodeInfo.AdjacentLinkCodes[loop] != NAME_None)
+		TWeakPtr<FAstarPathNode> adjacentNode = rootNode->AdjacentNodes[loop];
+		if (adjacentNode.IsValid() == true)
 		{
-			rootNode->AdjacentNodes[loop] = MakeShared<FAstarPathNode>();
-			rootNode->AdjacentNodes[loop]->SetParentNode(rootNode);
-			// 실제 유효한 PathNode의 위치값을 할당해줘야함. 
-			// rootNode->AdjacentNodes[loop]->SetPosition(FVector2D::ZeroVector); 
-			// 만약 PathNode의 Position 값, 그리고 Code값이 Start 혹은 Goal 노드와 동일한경우에 대해 처리가 필요.
-			MakePathNode(rootNode->AdjacentNodes[loop].Get());
+			TSharedPtr<FAstarPathNode>* visitedNode = CreatedNodes.Find(adjacentNode.Pin()->NodeIndex);
+			if (visitedNode == nullptr)
+			{
+				if (CreatedNodes.Contains(adjacentNode.Pin()->NodeIndex) == false)
+				{
+					CreatedNodes.Add(adjacentNode.Pin()->NodeIndex, adjacentNode.Pin());
+				}
+			}
+		}
+		else
+		{
+			TSharedPtr<FAstarPathNode> newNode = MakeShared<FAstarPathNode>();
+			newNode->SetNodePosition(FVector2D(FMath::Rand(), FMath::Rand()));
+			rootNode->AdjacentNodes[loop] = newNode;
+			//
+			newNode->AdjacentNodes[loop] = rootNode;
+			//
+			if (CreatedNodes.Contains(newNode->NodeIndex) == false)
+			{
+				CreatedNodes.Add(newNode->NodeIndex, newNode);
+			}
+		}
+	}
+
+	//
+	if (CreatedNodes.Contains(rootNode->NodeIndex) == false)
+	{
+		CreatedNodes.Add(rootNode->NodeIndex, rootNode);
+	}
+	// Traverse adjacent nodes.
+	for (TWeakPtr<FAstarPathNode> adjacentNode : rootNode->AdjacentNodes)
+	{
+		MakePathNodesRecursive(adjacentNode.Pin());
+	}
+}
+
+void FPathFinderAStar::ReleasePathNodesRecursive(TSharedPtr<FAstarPathNode> rootNode)
+{
+	// base case.
+	if (rootNode.IsValid() == false) return;
+	if (rootNode->bVisited == true) return;
+	rootNode->bVisited = true;
+
+	for (TWeakPtr<FAstarPathNode> node : rootNode->AdjacentNodes)
+	{
+		if (node.IsValid() == true)
+		{
+			ReleasePathNodesRecursive(node.Pin());
+			node.Reset();
 		}
 	}
 }
 
-void FPathFinderAStar::ReleasePathNode(FAstarPathNode* rootNode)
+void FPathFinderAStar::MakeObstaclePathNodesRecursive(TSharedPtr<FAstarPathNode> rootNode)
 {
-	if (rootNode == nullptr) return;
-
-	for (int32 loop = 0; loop < MAX_ADJACENT; loop++)
+	// base case.
+	if (rootNode.IsValid() == false) return;
+	if (rootNode->bVisited == true) return;
+	rootNode->bVisited = true;
+	// debug
+#if WITH_EDITOR
+	int32 DebugNodeIndex = rootNode->NodeIndex;
+#endif
+	if (IsInClosedList(rootNode->GetNodePosition()) == false)
 	{
-		if (rootNode->AdjacentNodes[loop].IsValid() == true)
-		{
-			ReleasePathNode(rootNode->AdjacentNodes[loop].Get());
-			rootNode->AdjacentNodes[loop].Reset();
-		}
+		ClosedList.Add(rootNode);
+	}
+	// base case and Traverse other nodes.
+	for (TWeakPtr<FAstarPathNode> node : rootNode->AdjacentNodes)
+	{
+		MakeObstaclePathNodesRecursive(node.Pin());
 	}
 }
-
 
 FAstarPathNode::FAstarPathNode()
 {
@@ -294,84 +355,77 @@ FAstarPathNode::FAstarPathNode()
 
 FAstarPathNode::~FAstarPathNode()
 {
+	for (TWeakPtr<FAstarPathNode> node : AdjacentNodes)
+	{
+		if (node.IsValid() == true)
+		{
+			node.Reset();
+		}
+	}
 }
 
-void FAstarPathNode::CalcGValue()
+void FAstarPathNode::CalcGScalarValue()
 {
-	if (ParentNode.Get() == nullptr)
+	if (ParentNode.Pin().IsValid() == false)
 	{
-		GValue = 0;
+		GScalarValue = 0;
 		return;
 	}
-	int diffX = Position.X - ParentNode->GetPosition().X;
-	int diffY = Position.Y - ParentNode->GetPosition().Y;
-	if (((diffX == -1) && (diffY == 1))
-		|| ((diffX == 1) && (diffY == 1))
-		|| ((diffX == -1) && (diffY == -1))
-		|| ((diffX == 1) && (diffY == -1)))
+
+	const int32 diffX = FMath::Abs(NodePosition.X - ParentNode.Pin()->GetNodePosition().X);
+	const int32 diffY = FMath::Abs(NodePosition.Y - ParentNode.Pin()->GetNodePosition().Y);
+	// 대각선
+	if (diffX == 1 && diffY == 1)
 	{
-		// 대각선 이동.
-		GValue = (FMath::Abs(diffX) + FMath::Abs(diffY)) * 14 + ParentNode->GetGValue();
+		GScalarValue = (diffX + diffY) * 14 + ParentNode.Pin()->GetGScalarValue();
 	}
-	else
+	else // 4방향.
 	{
-		// 좌우상하 이동.
-		GValue = (FMath::Abs(diffX) + FMath::Abs(diffY)) * 10 + ParentNode->GetGValue();
+		GScalarValue = (diffX + diffY) * 10 + ParentNode.Pin()->GetGScalarValue();
 	}
+	
 }
 
-void FAstarPathNode::CalcHValue(FAstarPathNode* goal)
+void FAstarPathNode::CalcHScalarValue(TSharedPtr<FAstarPathNode> goal)
 {
-	int diffX = goal->GetPosition().X - Position.X;
-	int diffY = goal->GetPosition().Y - Position.Y;
+	const int32 diffX = goal->GetNodePosition().X - NodePosition.X;
+	const int32 diffY = goal->GetNodePosition().Y - NodePosition.Y;
 
-	HValue = (FMath::Abs(diffX) + FMath::Abs(diffY)) * 10;
+	HScalarValue = (FMath::Abs(diffX) + FMath::Abs(diffY)) * 10;
 }
 
-FVector2D FAstarPathNode::GetPosition()
+FVector2D FAstarPathNode::GetNodePosition()
 {
-	return Position;
+	return NodePosition;
 }
 
-void FAstarPathNode::SetPosition(int x, int y)
+void FAstarPathNode::SetNodePosition(int32 x, int32 y)
 {
-	Position.X = x;
-	Position.Y = y;
+	NodePosition.X = x;
+	NodePosition.Y = y;
 }
 
-void FAstarPathNode::SetPosition(FVector2D pos)
+void FAstarPathNode::SetNodePosition(FVector2D pos)
 {
-	Position = pos;
+	NodePosition = pos;
 }
 
-FAstarPathNode* FAstarPathNode::GetParentNode()
+TSharedPtr<FAstarPathNode> FAstarPathNode::GetParentNode()
 {
-	return ParentNode.Get();
+	return ParentNode.Pin();
 }
 
-int FAstarPathNode::GetGValue()
+int32 FAstarPathNode::GetGScalarValue()
 {
-	return GValue;
+	return GScalarValue;
 }
 
-int FAstarPathNode::GetHValue()
+int32 FAstarPathNode::GetHScalarValue()
 {
-	return HValue;
+	return HScalarValue;
 }
 
-void FAstarPathNode::SetParentNode(FAstarPathNode * node)
+void FAstarPathNode::SetParentNode(TSharedPtr<FAstarPathNode> node)
 {
-	ParentNode = MakeShareable<FAstarPathNode>(node);
-}
-
-TArray<FPathNodeDijkstra> FPathFinderDijkstra::Pathfinding(FVector2D start, FVector2D goal)
-{
-	TArray<FPathNodeDijkstra> MapList; // 맵.
-	TArray<FPathNodeDijkstra> PriortyQueue;
-	//
-	PriortyQueue.HeapPush(MapList[0], FPriorityPredicate());
-	for (int32 loopCnt = 0; loopCnt < MapList.Num(); loopCnt++)
-	{
-		PriortyQueue.HeapPush(MapList[loopCnt], FPriorityPredicate());
-	}
+	ParentNode = TWeakPtr<FAstarPathNode>(node);
 }

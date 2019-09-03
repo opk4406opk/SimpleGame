@@ -2,47 +2,38 @@
 
 #include "CoreMinimal.h"
 #include "Runtime/CoreUObject/Public/UObject/Class.h"
-#define MAP_SIZE_X 10
-#define MAP_SIZE_Y 10
-#define INFINITY_VALUE 9999999
+
 #define MAX_ADJACENT 4
 
 namespace PathfindingAlgorithm
 {
-	struct FSortiePathNodeInformation
-	{
-	public:
-		int32 FloorIndex;
-		FName FloorCode;
-		FName AdjacentLinkCodes[MAX_ADJACENT];
-	};
-
 	struct FAstarPathNode
 	{
 	public:
 		FAstarPathNode();
 		~FAstarPathNode();
 
-		void CalcGValue();
-		void CalcHValue(FAstarPathNode* goal);
-		FVector2D GetPosition();
-		void SetPosition(int x, int y);
-		void SetPosition(FVector2D pos);
-		FAstarPathNode* GetParentNode();
-		int32 GetGValue();
-		int32 GetHValue();
-		void SetParentNode(FAstarPathNode* node);
+		void CalcGScalarValue();
+		void CalcHScalarValue(TSharedPtr<FAstarPathNode> goal);
+		FVector2D GetNodePosition();
+		void SetNodePosition(int32 x, int32 y);
+		void SetNodePosition(FVector2D pos);
+		TSharedPtr<FAstarPathNode> GetParentNode();
+		int32 GetGScalarValue();
+		int32 GetHScalarValue();
+		void SetParentNode(TSharedPtr<FAstarPathNode> node);
 	public:
-		TSharedPtr<FAstarPathNode> AdjacentNodes[MAX_ADJACENT];
-		FSortiePathNodeInformation SoritePathNodeInfo;
+		TWeakPtr<FAstarPathNode> AdjacentNodes[MAX_ADJACENT] = { nullptr, nullptr, nullptr, nullptr };
 		bool bGoalNode = false;
+		bool bStartNode = false;
+		bool bVisited = false;
+		int32 NodeIndex;
 	private:
-		TSharedPtr<FAstarPathNode> ParentNode;
-		FVector2D Position;
-		int32 GValue = 0;
-		int32 HValue = 0;
+		TWeakPtr<FAstarPathNode> ParentNode;
+		FVector2D NodePosition = FVector2D::ZeroVector;
+		int32 GScalarValue = 0;
+		int32 HScalarValue = 0;
 	};
-
 	class FPathFinderAStar
 	{
 	public:
@@ -51,24 +42,33 @@ namespace PathfindingAlgorithm
 		
 		//길찾기를 시작합니다.
 		bool Pathfinding(TArray<int32>& navigateList, int32 startIndex, int32 goalIndex);
+	public:
+		int32 StartFloorID;
+		int32 GoalFloorID;
+	
 	private:
-		TArray<FAstarPathNode*> OpenList;
-		TArray<FAstarPathNode*> ClosedList;
-		TSharedPtr<FAstarPathNode> CurrentNode; // 시작점으로 시작해서 목표까지 찾아가는 노드.
-		TSharedPtr<FAstarPathNode> GoalNode;
-		TSharedPtr<FAstarPathNode> RootNode;
+		TMap<int32, TSharedPtr<FAstarPathNode>> CreatedNodes;
+		TArray<TWeakPtr<FAstarPathNode>> OpenList;
+		TArray<TWeakPtr<FAstarPathNode>> ClosedList;
+		TWeakPtr<FAstarPathNode> TraverseNode = nullptr; // 시작점으로 시작해서 목표까지 찾아가는 노드.
+		TWeakPtr<FAstarPathNode> GoalNode = nullptr;
+		TSharedPtr<FAstarPathNode> RootNode = nullptr;
+
 	private:
 		void InitPathFinding();
 		void CurNodeToClosedList();
-		bool IsInClosedList(int searchPosX, int searchPosY);
-		bool IsInOpenList(int searchPosX, int searchPosY);
+		bool IsInClosedList(FVector2D searchPos);
+		bool IsInOpenList(FVector2D searchPos);
 		bool IsGoalInOpenList();
-		void SetOpenList();
-		void SearchAdjacentNodes(FAstarPathNode* selectNode);
+		void SettingOpenList();
+		void SearchAdjacentNodes(TSharedPtr<FAstarPathNode> selectNode);
 		bool ExtractNavigatePath(TArray<int32>& navigatePath);
-		void MakePathNode(FAstarPathNode* rootNode);
-		void ReleasePathNode(FAstarPathNode* rootNode);
-		FAstarPathNode* SelectLowCostPath();
+		void MakePathNodesRecursive(TSharedPtr<FAstarPathNode> rootNode);
+		void ReleasePathNodesRecursive(TSharedPtr<FAstarPathNode> rootNode);
+		void MakeObstaclePathNodesRecursive(TSharedPtr<FAstarPathNode> rootNode);
+		TSharedPtr<FAstarPathNode> SelectLowCostPath();
+		void ReleaseAllData();
+		void InitalizeVisitedFlag();
 	};
 
 	struct FPriorityPredicate
@@ -77,7 +77,7 @@ namespace PathfindingAlgorithm
 		{
 			// Inverted compared to std::priority_queue - higher priorities float to the top
 			return A.Distance > B.Distance;
-		}
+		};
 	};
 
 	struct FPathNodeDijkstra
@@ -85,7 +85,6 @@ namespace PathfindingAlgorithm
 	public:
 		int32 Distance;
 		FVector2D Position;
-		TArray<FPathNodeDijkstra> Childs;
 	};
 
 	class FPathFinderDijkstra
