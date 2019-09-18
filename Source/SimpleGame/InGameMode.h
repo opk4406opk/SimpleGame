@@ -7,7 +7,11 @@
 #include "SimpleGame/GamePlayerCharacter.h"
 #include "SimpleGame/GamePlayerController.h"
 #include "SimpleGame/GamePlayerCameraManager.h"
+#include "SimpleGame/SimpleGameData.h"
 #include "Enums.h"
+#include "Runtime/Engine/Classes/Engine/LevelStreamingDynamic.h"
+#include "Runtime/Engine/Classes/Engine/LevelStreaming.h"
+#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
 #include "InGameMode.generated.h"
 
 /**
@@ -20,14 +24,27 @@ class SIMPLEGAME_API AInGameMode : public ASimpleGameGameModeBase
 public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual void StartPlay() override;
-
-	UFUNCTION(Exec) void TestAAMethod(EGameAntialiasingMethod methodType);
+	// AA 테스트 함수.
+	UFUNCTION(Exec)
+	void TestAAMethod(EGameAntialiasingMethod methodType);
+	// Level 로딩 테스트.
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void LoadOtherLevel();
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void UnLoadOtherLevel();
+private:
+	void LoadLevelInstance(TSoftObjectPtr<UWorld> Level);
+	void UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level);
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSoftClassPtr<AGamePlayerCharacter> GamePlayerCharacter;
-
+	UPROPERTY(EditDefaultsOnly)
+	USimpleGameData* SimpleGameDataAsset;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> UserInterfaceWidgetClass;
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	AGamePlayerCharacter* GamePlayerInstance;
-
+	UPROPERTY(Transient)
+	UUserWidget* UserInterfaceWidget;
 };

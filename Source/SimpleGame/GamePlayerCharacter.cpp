@@ -46,7 +46,7 @@ void AGamePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 void AGamePlayerCharacter::MoveTouchPadX(float x)
 {
-	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::MoveTouchPadX : %f"), x);
+	//UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::MoveTouchPadX : %f"), x);
 	FVector curLoc = GetActorLocation();
 	curLoc.X -= x * MoveSpeed;
 	SetActorLocation(curLoc);
@@ -54,7 +54,7 @@ void AGamePlayerCharacter::MoveTouchPadX(float x)
 
 void AGamePlayerCharacter::MoveTouchPadY(float y)
 {
-	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::MoveTouchPadY : %f"), y);
+	//UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::MoveTouchPadY : %f"), y);
 	FVector curLoc = GetActorLocation();
 	curLoc.Y += y * MoveSpeed;
 	SetActorLocation(curLoc);
@@ -62,13 +62,13 @@ void AGamePlayerCharacter::MoveTouchPadY(float y)
 
 void AGamePlayerCharacter::RotationTouchPadX(float x)
 {
-	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationTouchPadX : %f"), x);
+	//UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationTouchPadX : %f"), x);
 	LatestTouchRotation.Yaw = x;
 }
 
 void AGamePlayerCharacter::RotationOtuchPadY(float y)
 {
-	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationOtuchPadY : %f"), y);
+	//UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationOtuchPadY : %f"), y);
 	//LatestTouchRotation.Roll = y;
 	if (CameraComponent == nullptr) return;
 	CameraComponent->AddRelativeRotation(FRotator(y, 0.0f, 0.0f));

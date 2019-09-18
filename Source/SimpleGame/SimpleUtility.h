@@ -73,11 +73,11 @@ namespace PathfindingAlgorithm
 
 	struct FPriorityPredicate
 	{
-		bool operator()(const FPathNodeDijkstra& A, const FPathNodeDijkstra& B) const
-		{
-			// Inverted compared to std::priority_queue - higher priorities float to the top
-			return A.Distance > B.Distance;
-		};
+		//bool operator()(const FPathNodeDijkstra& A, const FPathNodeDijkstra& B) const
+		//{
+		//	// Inverted compared to std::priority_queue - higher priorities float to the top
+		//	return A.Distance > B.Distance;
+		//};
 	};
 
 	struct FPathNodeDijkstra

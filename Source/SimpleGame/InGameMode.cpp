@@ -7,6 +7,11 @@
 void AInGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
+	UserInterfaceWidget = CreateWidget(GetWorld(), UserInterfaceWidgetClass);
+	if (UserInterfaceWidget != nullptr)
+	{
+		UserInterfaceWidget->AddToViewport();
+	}
 	UE_LOG(LogTemp, Display, TEXT("AInGameMode::InitGame"));
 }
 
@@ -80,4 +85,46 @@ void AInGameMode::TestAAMethod(EGameAntialiasingMethod methodType)
 	}
 	IConsoleVariable* antialiasingMethod = IConsoleManager::Get().FindConsoleVariable(TEXT("r.DefaultFeature.AntiAliasing"));
 	antialiasingMethod->Set((float)methodType);
+}
+
+void AInGameMode::LoadOtherLevel()
+{
+	LoadLevelInstance(SimpleGameDataAsset->OhterLevel);
+}
+
+void AInGameMode::UnLoadOtherLevel()
+{
+	UnLoadLevelInstance(SimpleGameDataAsset->OhterLevel);
+}
+
+void AInGameMode::LoadLevelInstance(TSoftObjectPtr<UWorld> Level)
+{
+	bool result = false;
+	ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(GetWorld(), Level, FVector::ZeroVector, FRotator::ZeroRotator, result);
+	if (result == false)
+	{
+		UE_LOG(LogTemp, Error, TEXT("trying to load invalid level %s"), *Level.GetLongPackageName());
+		return;
+	}
+}
+
+void AInGameMode::UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level)
+{
+	UWorld* const world = GetWorld();
+	if (!world) return;
+
+	int32 index = world->GetStreamingLevels().IndexOfByPredicate([&](const ULevelStreaming* param) {
+		return param->PackageNameToLoad == FName(*Level.GetLongPackageName()); });
+	if (index == INDEX_NONE)
+	{
+		UE_LOG(LogTemp, Error, TEXT("trying to unload invalid level %s"), *Level.GetLongPackageName());
+		return;
+	}
+
+	ULevelStreaming* streamingLevel = world->GetStreamingLevels()[index];
+	if (ULevel* level = streamingLevel->GetLoadedLevel())
+	{
+		streamingLevel->GetWorld()->RemoveFromWorld(level);
+	}
+	world->RemoveStreamingLevel(streamingLevel);
 }
