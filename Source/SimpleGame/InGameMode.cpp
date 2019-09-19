@@ -145,7 +145,7 @@ void AInGameMode::LoadLevelStream()
 	auto t = SimpleGameDataAsset->OhterLevel.GetUniqueID().GetAssetPathName();
 	auto tt = SimpleGameDataAsset->OhterLevel.GetLongPackageName();
 	auto ttt = SimpleGameDataAsset->OhterLevel.GetAssetName();
-	UGameplayStatics::LoadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), true, true, LatentInfo);
+	UGameplayStatics::LoadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), true, false, LatentInfo);
 	ULevelStreaming* level = UGameplayStatics::GetStreamingLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName());
 	if (level == nullptr)
 	{
