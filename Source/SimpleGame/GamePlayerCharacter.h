@@ -23,9 +23,10 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void EnableDidheringMaterial(bool enable);
 public:
 	UPROPERTY(EditAnywhere)
 	AActor* TargetActor;

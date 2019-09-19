@@ -12,6 +12,7 @@
 #include "Runtime/Engine/Classes/Engine/LevelStreamingDynamic.h"
 #include "Runtime/Engine/Classes/Engine/LevelStreaming.h"
 #include "Runtime/UMG/Public/Blueprint/UserWidget.h"
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "InGameMode.generated.h"
 
 /**
@@ -32,9 +33,16 @@ public:
 	void LoadOtherLevel();
 	UFUNCTION(BlueprintCallable, Category = "TEST")
 	void UnLoadOtherLevel();
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void LoadStreamOtherLevel();
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void UnLoadStreamOtherLevel();
 private:
 	void LoadLevelInstance(TSoftObjectPtr<UWorld> Level);
 	void UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level);
+
+	void LoadLevelStream();
+	void UnLoadLevelStream();
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSoftClassPtr<AGamePlayerCharacter> GamePlayerCharacter;

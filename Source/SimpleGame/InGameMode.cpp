@@ -97,6 +97,16 @@ void AInGameMode::UnLoadOtherLevel()
 	UnLoadLevelInstance(SimpleGameDataAsset->OhterLevel);
 }
 
+void AInGameMode::LoadStreamOtherLevel()
+{
+	LoadLevelStream();
+}
+
+void AInGameMode::UnLoadStreamOtherLevel()
+{
+	UnLoadLevelStream();
+}
+
 void AInGameMode::LoadLevelInstance(TSoftObjectPtr<UWorld> Level)
 {
 	bool result = false;
@@ -127,4 +137,36 @@ void AInGameMode::UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level)
 		streamingLevel->GetWorld()->RemoveFromWorld(level);
 	}
 	world->RemoveStreamingLevel(streamingLevel);
+}
+
+void AInGameMode::LoadLevelStream()
+{
+	FLatentActionInfo LatentInfo;
+	auto t = SimpleGameDataAsset->OhterLevel.GetUniqueID().GetAssetPathName();
+	auto tt = SimpleGameDataAsset->OhterLevel.GetLongPackageName();
+	auto ttt = SimpleGameDataAsset->OhterLevel.GetAssetName();
+	UGameplayStatics::LoadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), true, true, LatentInfo);
+	ULevelStreaming* level = UGameplayStatics::GetStreamingLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName());
+	if (level == nullptr)
+	{
+		if (GEngine)
+		{
+			GEngine->ClearOnScreenDebugMessages();
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("UGameplayStatics::LoadStreamLevel is Failed..."));
+		}
+	}
+	else
+	{
+		if (GEngine)
+		{
+			GEngine->ClearOnScreenDebugMessages();
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, TEXT("UGameplayStatics::LoadStreamLevel is Success~"));
+		}
+	}
+}
+
+void AInGameMode::UnLoadLevelStream()
+{
+	FLatentActionInfo LatentInfo;
+	UGameplayStatics::UnloadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), LatentInfo, true);
 }

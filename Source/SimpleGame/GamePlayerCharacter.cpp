@@ -20,8 +20,7 @@ void AGamePlayerCharacter::BeginPlay()
 	CameraComponent = Cast<UCameraComponent>(GetComponentByClass(UCameraComponent::StaticClass()));
 	MeshComponent = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
 	
-	auto ditheringMaterial = MeshComponent->GetMaterial(2);
-	MeshComponent->SetMaterial(0, ditheringMaterial);
+	EnableDidheringMaterial(false);
 }
 
 // Called every frame
@@ -42,6 +41,21 @@ void AGamePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAxis("MoveTouchPadY", this, &AGamePlayerCharacter::MoveTouchPadY);
 	PlayerInputComponent->BindAxis("RotationTouchPadX", this, &AGamePlayerCharacter::RotationTouchPadX);
 	PlayerInputComponent->BindAxis("RotationTouchPadY", this, &AGamePlayerCharacter::RotationOtuchPadY);
+}
+
+void AGamePlayerCharacter::EnableDidheringMaterial(bool enable)
+{
+	int32 matNum = 0;
+	if (enable == true)
+	{
+		matNum = 2;
+	}
+	else
+	{
+		matNum = 0;
+	}
+	auto material = MeshComponent->GetMaterial(matNum);
+	MeshComponent->SetMaterial(0, material);
 }
 
 void AGamePlayerCharacter::MoveTouchPadX(float x)
