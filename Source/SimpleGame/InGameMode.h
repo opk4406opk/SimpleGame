@@ -34,15 +34,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TEST")
 	void UnLoadOtherLevel();
 	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void LoadStreamOtherLevel();
+	void LoadSimpleLevelWithLS(bool IncludeLS);
 	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void UnLoadStreamOtherLevel();
+	void UnLoadSimpleLevelWithLS(bool IncludeLS);
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void LoadSubStreamOtherLevel();
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void UnLoadSubStreamOtherLevel();
 private:
 	void LoadLevelInstance(TSoftObjectPtr<UWorld> Level);
 	void UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level);
 
-	void LoadLevelStream();
-	void UnLoadLevelStream();
+	void LoadSubLevelStream();
+	void UnLoadSubLevelStream();
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSoftClassPtr<AGamePlayerCharacter> GamePlayerCharacter;
@@ -55,4 +59,6 @@ private:
 	AGamePlayerCharacter* GamePlayerInstance;
 	UPROPERTY(Transient)
 	UUserWidget* UserInterfaceWidget;
+	UPROPERTY(Transient)
+	ULevelStreamingDynamic* LevelStreaming;
 };

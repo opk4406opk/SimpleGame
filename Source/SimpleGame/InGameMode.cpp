@@ -97,24 +97,50 @@ void AInGameMode::UnLoadOtherLevel()
 	UnLoadLevelInstance(SimpleGameDataAsset->OhterLevel);
 }
 
-void AInGameMode::LoadStreamOtherLevel()
+void AInGameMode::LoadSimpleLevelWithLS(bool IncludeLS)
 {
-	LoadLevelStream();
+	LoadLevelInstance(SimpleGameDataAsset->SimpleLevel);
+	if (IncludeLS == true)
+	{
+		LoadLevelInstance(SimpleGameDataAsset->LS_SimpleLevel);
+	}
 }
 
-void AInGameMode::UnLoadStreamOtherLevel()
+void AInGameMode::UnLoadSimpleLevelWithLS(bool IncludeLS)
 {
-	UnLoadLevelStream();
+	UnLoadLevelInstance(SimpleGameDataAsset->SimpleLevel);
+	if (IncludeLS == true)
+	{
+		UnLoadLevelInstance(SimpleGameDataAsset->LS_SimpleLevel);
+	}
+}
+
+void AInGameMode::LoadSubStreamOtherLevel()
+{
+	LoadSubLevelStream();
+}
+
+void AInGameMode::UnLoadSubStreamOtherLevel()
+{
+	UnLoadSubLevelStream();
 }
 
 void AInGameMode::LoadLevelInstance(TSoftObjectPtr<UWorld> Level)
 {
 	bool result = false;
-	ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(GetWorld(), Level, FVector::ZeroVector, FRotator::ZeroRotator, result);
+	LevelStreaming = ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(GetWorld(), Level, FVector::ZeroVector, FRotator::ZeroRotator, result);
 	if (result == false)
 	{
 		UE_LOG(LogTemp, Error, TEXT("trying to load invalid level %s"), *Level.GetLongPackageName());
 		return;
+	}
+
+	GEngine->ClearOnScreenDebugMessages();
+	auto arr = GetWorld()->GetStreamingLevels();
+	for (ULevelStreaming* levelStream : GetWorld()->GetStreamingLevels())
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Sub level name : %s"), levelStream->PackageNameToLoad);
+		UE_LOG(LogTemp, Error, TEXT("Sub level name %s"), *levelStream->PackageNameToLoad.ToString());
 	}
 }
 
@@ -139,11 +165,9 @@ void AInGameMode::UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level)
 	world->RemoveStreamingLevel(streamingLevel);
 }
 
-void AInGameMode::LoadLevelStream()
+void AInGameMode::LoadSubLevelStream()
 {
 	FLatentActionInfo LatentInfo;
-	auto t = SimpleGameDataAsset->OhterLevel.GetUniqueID().GetAssetPathName();
-	auto tt = SimpleGameDataAsset->OhterLevel.GetLongPackageName();
 	auto ttt = SimpleGameDataAsset->OhterLevel.GetAssetName();
 	UGameplayStatics::LoadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), true, false, LatentInfo);
 	ULevelStreaming* level = UGameplayStatics::GetStreamingLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName());
@@ -165,8 +189,8 @@ void AInGameMode::LoadLevelStream()
 	}
 }
 
-void AInGameMode::UnLoadLevelStream()
+void AInGameMode::UnLoadSubLevelStream()
 {
 	FLatentActionInfo LatentInfo;
-	UGameplayStatics::UnloadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), LatentInfo, true);
+	UGameplayStatics::UnloadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), LatentInfo, false);
 }
