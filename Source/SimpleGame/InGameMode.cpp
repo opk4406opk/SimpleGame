@@ -7,7 +7,8 @@
 void AInGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
-	UserInterfaceWidget = CreateWidget(GetWorld(), UserInterfaceWidgetClass);
+	UUserWidget* instancedWidget = CreateWidget(GetWorld(), UserInterfaceWidgetClass);
+	UserInterfaceWidget = Cast<USimpleUserWidget>(instancedWidget);
 	if (UserInterfaceWidget != nullptr)
 	{
 		UserInterfaceWidget->AddToViewport();
@@ -27,6 +28,11 @@ void AInGameMode::StartPlay()
 		GamePlayerInstance->SetActorLabel(*FString("GamePlayerCharacter_Instance"));
 #endif
 	}*/
+}
+
+void AInGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
 }
 
 void AInGameMode::TestAAMethod(EGameAntialiasingMethod methodType)
@@ -137,13 +143,24 @@ void AInGameMode::UnLoadLargeLevel()
 
 void AInGameMode::LoadLevelInstance(TSoftObjectPtr<UWorld> Level)
 {
+	if (GEngine)
+	{
+		GEngine->ClearOnScreenDebugMessages();
+		GEngine->AddOnScreenDebugMessage(-1, 99999.0f, FColor::Green, TEXT("Start Stream Sub level..."));
+	}
+	UserInterfaceWidget->SetLogText(FString("Start Stream Sub level..."));
+	//
 	bool result = false;
-	LevelStreaming = ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(GetWorld(), Level, FVector::ZeroVector, FRotator::ZeroRotator, result);
+	CurrentLevelStreaming = ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(GetWorld(), Level, FVector::ZeroVector, FRotator::ZeroRotator, result);
 	if (result == false)
 	{
 		UE_LOG(LogTemp, Error, TEXT("trying to load invalid level %s"), *Level.GetLongPackageName());
 		return;
 	}
+
+	OnFinishLoadSubLevelDelegate.Clear();
+	OnFinishLoadSubLevelDelegate.BindUFunction(this, "OnFinishLoadSubLevel");
+	CurrentLevelStreaming->OnLevelShown.Add(OnFinishLoadSubLevelDelegate);
 
 	GEngine->ClearOnScreenDebugMessages();
 	auto arr = GetWorld()->GetStreamingLevels();
@@ -203,4 +220,17 @@ void AInGameMode::UnLoadSubLevelStream()
 {
 	FLatentActionInfo LatentInfo;
 	UGameplayStatics::UnloadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), LatentInfo, false);
+}
+
+void AInGameMode::OnFinishLoadSubLevel()
+{
+	if (IsValid(UserInterfaceWidget) == true)
+	{
+		if (GEngine)
+		{
+			GEngine->ClearOnScreenDebugMessages();
+			GEngine->AddOnScreenDebugMessage(-1, 99999.0f, FColor::Green, TEXT("Finish Stream Sub level..."));
+		}
+		UserInterfaceWidget->SetLogText(FString("Finish Stream Sub level..."));
+	}
 }

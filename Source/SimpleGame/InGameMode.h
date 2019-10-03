@@ -13,6 +13,9 @@
 #include "Runtime/Engine/Classes/Engine/LevelStreaming.h"
 #include "Runtime/UMG/Public/Blueprint/UserWidget.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "Runtime/Core/Public/UObject/ScriptDelegates.h"
+#include "SimpleGame/SimpleUserWidget.h"
+
 #include "InGameMode.generated.h"
 
 /**
@@ -25,6 +28,7 @@ class SIMPLEGAME_API AInGameMode : public ASimpleGameGameModeBase
 public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual void StartPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	// AA 테스트 함수.
 	UFUNCTION(Exec)
 	void TestAAMethod(EGameAntialiasingMethod methodType);
@@ -52,6 +56,8 @@ private:
 
 	void LoadSubLevelStream();
 	void UnLoadSubLevelStream();
+	UFUNCTION()
+	void OnFinishLoadSubLevel();
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSoftClassPtr<AGamePlayerCharacter> GamePlayerCharacter;
@@ -63,7 +69,9 @@ private:
 	UPROPERTY(Transient)
 	AGamePlayerCharacter* GamePlayerInstance;
 	UPROPERTY(Transient)
-	UUserWidget* UserInterfaceWidget;
+	USimpleUserWidget* UserInterfaceWidget;
 	UPROPERTY(Transient)
-	ULevelStreamingDynamic* LevelStreaming;
+	ULevelStreamingDynamic* CurrentLevelStreaming;
+	//
+	TScriptDelegate<FWeakObjectPtr> OnFinishLoadSubLevelDelegate;
 };
