@@ -41,6 +41,11 @@ public:
 	void LoadSubStreamOtherLevel();
 	UFUNCTION(BlueprintCallable, Category = "TEST")
 	void UnLoadSubStreamOtherLevel();
+
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void LoadLargeLevel();
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void UnLoadLargeLevel();
 private:
 	void LoadLevelInstance(TSoftObjectPtr<UWorld> Level);
 	void UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level);

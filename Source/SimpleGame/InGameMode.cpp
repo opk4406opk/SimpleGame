@@ -125,6 +125,16 @@ void AInGameMode::UnLoadSubStreamOtherLevel()
 	UnLoadSubLevelStream();
 }
 
+void AInGameMode::LoadLargeLevel()
+{
+	LoadLevelInstance(SimpleGameDataAsset->LargeLevel);
+}
+
+void AInGameMode::UnLoadLargeLevel()
+{
+	UnLoadLevelInstance(SimpleGameDataAsset->LargeLevel);
+}
+
 void AInGameMode::LoadLevelInstance(TSoftObjectPtr<UWorld> Level)
 {
 	bool result = false;
