@@ -133,12 +133,22 @@ void AInGameMode::UnLoadSubStreamOtherLevel()
 
 void AInGameMode::LoadLargeLevel()
 {
-	LoadLevelInstance(SimpleGameDataAsset->LargeLevel);
+	LoadLevelInstance(SimpleGameDataAsset->BigLargeLevel);
 }
 
 void AInGameMode::UnLoadLargeLevel()
 {
-	UnLoadLevelInstance(SimpleGameDataAsset->LargeLevel);
+	UnLoadLevelInstance(SimpleGameDataAsset->BigLargeLevel);
+}
+
+void AInGameMode::LoadMidiumLevel()
+{
+	LoadLevelInstance(SimpleGameDataAsset->MidiumLevel);
+}
+
+void AInGameMode::UnLoadMidiumLevel()
+{
+	UnLoadLevelInstance(SimpleGameDataAsset->MidiumLevel);
 }
 
 void AInGameMode::LoadLevelInstance(TSoftObjectPtr<UWorld> Level)
@@ -233,4 +243,5 @@ void AInGameMode::OnFinishLoadSubLevel()
 		}
 		UserInterfaceWidget->SetLogText(FString("Finish Stream Sub level..."));
 	}
+	GetWorld()->FlushLevelStreaming();
 }

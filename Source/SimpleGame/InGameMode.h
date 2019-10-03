@@ -50,6 +50,10 @@ public:
 	void LoadLargeLevel();
 	UFUNCTION(BlueprintCallable, Category = "TEST")
 	void UnLoadLargeLevel();
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void LoadMidiumLevel();
+	UFUNCTION(BlueprintCallable, Category = "TEST")
+	void UnLoadMidiumLevel();
 private:
 	void LoadLevelInstance(TSoftObjectPtr<UWorld> Level);
 	void UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level);

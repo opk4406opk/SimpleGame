@@ -19,9 +19,12 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UWorld> SimpleLevel;
 	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UWorld> LargeLevel;
+	TSoftObjectPtr<UWorld> MidiumLevel;
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UWorld> BigLargeLevel;
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UWorld> LS_SimpleLevel;
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UWorld> DefaultInGameLevel;
+
 };
