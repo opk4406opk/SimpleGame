@@ -3,6 +3,7 @@
 #include "InGameMode.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
+#include "Runtime/Engine/Classes/Components/StaticMeshComponent.h"
 
 void AInGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
@@ -20,14 +21,11 @@ void AInGameMode::StartPlay()
 {
 	Super::StartPlay();
 	UE_LOG(LogTemp, Display, TEXT("AInGameMode::StartPlay"));
-	/*UClass* playerClass = GamePlayerCharacter.LoadSynchronous();
-	if (playerClass != nullptr)
-	{
-		GamePlayerInstance = GetWorld()->SpawnActor<AGamePlayerCharacter>(playerClass, FVector(0, 0, 0), FRotator(0, 0, 0));
+	//
+	GamePlayerInstance = GetWorld()->SpawnActor<AGamePlayerCharacter>(SimpleGameDataAsset->GamePlayerCharacterClass.Get(), FVector(0, 0, 0), FRotator(0, 0, 0));
 #if UE_EDITOR
-		GamePlayerInstance->SetActorLabel(*FString("GamePlayerCharacter_Instance"));
+	GamePlayerInstance->SetActorLabel(*FString("GamePlayerCharacter_Instance"));
 #endif
-	}*/
 }
 
 void AInGameMode::Tick(float DeltaSeconds)
@@ -205,7 +203,6 @@ void AInGameMode::UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level)
 void AInGameMode::LoadSubLevelStream()
 {
 	FLatentActionInfo LatentInfo;
-	auto ttt = SimpleGameDataAsset->OhterLevel.GetAssetName();
 	UGameplayStatics::LoadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), true, false, LatentInfo);
 	ULevelStreaming* level = UGameplayStatics::GetStreamingLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName());
 	if (level == nullptr)
@@ -242,6 +239,28 @@ void AInGameMode::OnFinishLoadSubLevel()
 			GEngine->AddOnScreenDebugMessage(-1, 99999.0f, FColor::Green, TEXT("Finish Stream Sub level..."));
 		}
 		UserInterfaceWidget->SetLogText(FString("Finish Stream Sub level..."));
+		//
+		TArray<AActor*> worldActors;
+		UGameplayStatics::GetAllActorsOfClass(CurrentLevelStreaming, AActor::StaticClass(), worldActors);
+		for (AActor* actor : worldActors)
+		{
+			AGamePlayerCharacter* gamePlayerCharacter = Cast<AGamePlayerCharacter>(actor);
+			if (gamePlayerCharacter == nullptr)
+			{
+				actor->SetActorTickEnabled(false);
+				UActorComponent* comp = actor->GetComponentByClass(UStaticMeshComponent::StaticClass());
+				/*UStaticMeshComponent* staticMeshComp = Cast<UStaticMeshComponent>(comp);
+				if (IsValid(staticMeshComp) == true)
+				{
+					staticMeshComp->SetCastShadow(false);
+				}*/
+			}
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 99999.0f, FColor::Yellow, TEXT("gamePlayerCharacter->PossessedBy(GetWorld()->GetFirstPlayerController()..."));
+				gamePlayerCharacter->PossessedBy(GetWorld()->GetFirstPlayerController());
+			}
+		}
 	}
 	GetWorld()->FlushLevelStreaming();
 }

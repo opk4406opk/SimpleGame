@@ -7,6 +7,8 @@
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 #include "GamePlayerCharacter.generated.h"
 
+class AGamePlayerController;
+
 UCLASS()
 class SIMPLEGAME_API AGamePlayerCharacter : public ACharacter
 {
@@ -54,4 +56,6 @@ private:
 	UCameraComponent* CameraComponent;
 	UPROPERTY(Transient)
 	USkeletalMeshComponent* MeshComponent;
+	UPROPERTY(Transient)
+	AGamePlayerController* GamePlayerControllerInstance;
 };

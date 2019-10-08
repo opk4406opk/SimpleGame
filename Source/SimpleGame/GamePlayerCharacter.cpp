@@ -1,8 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GamePlayerCharacter.h"
+#include "GamePlayerController.h"
 #include "Runtime/Engine/Classes/Components/InputComponent.h"
 #include "Runtime/Engine/Classes/Components/SkeletalMeshComponent.h"
+#include "SimpleGame/InGameMode.h"
 // Sets default values
 AGamePlayerCharacter::AGamePlayerCharacter()
 {
@@ -19,8 +21,10 @@ void AGamePlayerCharacter::BeginPlay()
 	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::BeginPlay"));
 	CameraComponent = Cast<UCameraComponent>(GetComponentByClass(UCameraComponent::StaticClass()));
 	MeshComponent = Cast<USkeletalMeshComponent>(GetComponentByClass(USkeletalMeshComponent::StaticClass()));
-	
-	EnableDidheringMaterial(false);
+	AInGameMode* gameMode = Cast<AInGameMode>(GetWorld()->GetAuthGameMode());
+	GamePlayerControllerInstance = GetWorld()->SpawnActor<AGamePlayerController>(gameMode->SimpleGameDataAsset->GamePlayerControllerClass.Get(), FVector(0, 0, 0), FRotator(0, 0, 0));
+	PossessedBy(GamePlayerControllerInstance);
+	EnableDidheringMaterial(true);
 }
 
 // Called every frame
@@ -60,7 +64,7 @@ void AGamePlayerCharacter::EnableDidheringMaterial(bool enable)
 
 void AGamePlayerCharacter::MoveTouchPadX(float x)
 {
-	//UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::MoveTouchPadX : %f"), x);
+	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::MoveTouchPadX : %f"), x);
 	FVector curLoc = GetActorLocation();
 	curLoc.X -= x * MoveSpeed;
 	SetActorLocation(curLoc);
@@ -68,7 +72,7 @@ void AGamePlayerCharacter::MoveTouchPadX(float x)
 
 void AGamePlayerCharacter::MoveTouchPadY(float y)
 {
-	//UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::MoveTouchPadY : %f"), y);
+	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::MoveTouchPadY : %f"), y);
 	FVector curLoc = GetActorLocation();
 	curLoc.Y += y * MoveSpeed;
 	SetActorLocation(curLoc);
@@ -76,13 +80,13 @@ void AGamePlayerCharacter::MoveTouchPadY(float y)
 
 void AGamePlayerCharacter::RotationTouchPadX(float x)
 {
-	//UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationTouchPadX : %f"), x);
+	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationTouchPadX : %f"), x);
 	LatestTouchRotation.Yaw = x;
 }
 
 void AGamePlayerCharacter::RotationOtuchPadY(float y)
 {
-	//UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationOtuchPadY : %f"), y);
+	UE_LOG(LogTemp, Display, TEXT("AGamePlayerCharacter::RotationOtuchPadY : %f"), y);
 	//LatestTouchRotation.Roll = y;
 	if (CameraComponent == nullptr) return;
 	CameraComponent->AddRelativeRotation(FRotator(y, 0.0f, 0.0f));

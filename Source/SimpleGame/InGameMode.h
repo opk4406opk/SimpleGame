@@ -64,8 +64,6 @@ private:
 	void OnFinishLoadSubLevel();
 public:
 	UPROPERTY(EditDefaultsOnly)
-	TSoftClassPtr<AGamePlayerCharacter> GamePlayerCharacter;
-	UPROPERTY(EditDefaultsOnly)
 	USimpleGameData* SimpleGameDataAsset;
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> UserInterfaceWidgetClass;

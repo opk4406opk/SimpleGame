@@ -6,6 +6,8 @@
 #include "Engine/DataAsset.h"
 #include "SimpleGameData.generated.h"
 
+class AGamePlayerCharacter;
+class AGamePlayerController;
 /**
  * 
  */
@@ -26,5 +28,8 @@ public:
 	TSoftObjectPtr<UWorld> LS_SimpleLevel;
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UWorld> DefaultInGameLevel;
-
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AGamePlayerCharacter> GamePlayerCharacterClass;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AGamePlayerController> GamePlayerControllerClass;
 };
