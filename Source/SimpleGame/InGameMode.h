@@ -76,4 +76,7 @@ private:
 	ULevelStreamingDynamic* CurrentLevelStreaming;
 	//
 	TScriptDelegate<FWeakObjectPtr> OnFinishLoadSubLevelDelegate;
+	//
+	UPROPERTY(Transient)
+	TArray<AActor*> OriginPersistentActors;
 };

@@ -32,4 +32,8 @@ public:
 	TSubclassOf<AGamePlayerCharacter> GamePlayerCharacterClass;
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AGamePlayerController> GamePlayerControllerClass;
+	
+	// configs
+	UPROPERTY(EditDefaultsOnly)
+	bool bNewLevelAllLigthOff = true;
 };

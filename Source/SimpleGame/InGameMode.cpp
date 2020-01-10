@@ -4,6 +4,11 @@
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/Engine/Engine.h"
 #include "Runtime/Engine/Classes/Components/StaticMeshComponent.h"
+#include "Runtime/Engine/Classes/Engine/SkyLight.h"
+#include "Runtime/Engine/Classes/Engine/Light.h"
+#include "Runtime/Engine/Classes/Engine/PostProcessVolume.h"
+#include "Runtime/Engine/Classes/Components/LightComponent.h"
+#include "Runtime/Engine/Classes/Components/SkyLightComponent.h"
 
 void AInGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
@@ -151,6 +156,10 @@ void AInGameMode::UnLoadMidiumLevel()
 
 void AInGameMode::LoadLevelInstance(TSoftObjectPtr<UWorld> Level)
 {
+	// 새로운 레벨 비동기 로딩 전에 현재 퍼시스턴트에 존재하는 액터 저장.
+	OriginPersistentActors.Empty();
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), OriginPersistentActors);
+	///////////////////////////////////////////////////////////////////////////////////////////////
 	if (GEngine)
 	{
 		GEngine->ClearOnScreenDebugMessages();
@@ -240,9 +249,20 @@ void AInGameMode::OnFinishLoadSubLevel()
 		}
 		UserInterfaceWidget->SetLogText(FString("Finish Stream Sub level..."));
 		//
-		TArray<AActor*> worldActors;
-		UGameplayStatics::GetAllActorsOfClass(CurrentLevelStreaming, AActor::StaticClass(), worldActors);
-		for (AActor* actor : worldActors)
+		
+		TArray<AActor*> newLevelActors;
+		TArray<AActor*> totalActors;
+		UGameplayStatics::GetAllActorsOfClass(CurrentLevelStreaming->GetLoadedLevel(), AActor::StaticClass(), totalActors);
+		for (AActor* actor : totalActors)
+		{
+			int32 result = OriginPersistentActors.Find(actor);
+			if (result == INDEX_NONE)
+			{
+				newLevelActors.Add(actor);
+			}
+		}
+
+		for (AActor* actor : newLevelActors)
 		{
 			AGamePlayerCharacter* gamePlayerCharacter = Cast<AGamePlayerCharacter>(actor);
 			if (gamePlayerCharacter == nullptr)
@@ -260,6 +280,37 @@ void AInGameMode::OnFinishLoadSubLevel()
 				GEngine->AddOnScreenDebugMessage(-1, 99999.0f, FColor::Yellow, TEXT("gamePlayerCharacter->PossessedBy(GetWorld()->GetFirstPlayerController()..."));
 				gamePlayerCharacter->PossessedBy(GetWorld()->GetFirstPlayerController());
 			}
+
+			if (SimpleGameDataAsset->bNewLevelAllLigthOff == true)
+			{
+				ASkyLight* skyLigthActor = Cast<ASkyLight>(actor);
+				ALight* lightActor = Cast<ALight>(actor);
+				APostProcessVolume* postprocessVolume = Cast<APostProcessVolume>(actor);
+				if (postprocessVolume != nullptr && postprocessVolume->bEnabled == true)
+				{
+					postprocessVolume->bEnabled = false;
+					postprocessVolume->SetActorHiddenInGame(true);
+				}
+				else if (IsValid(lightActor) == true)
+				{
+					if (lightActor->GetLightComponent() != nullptr && lightActor->GetLightComponent()->bVisible == true)
+					{
+						lightActor->GetLightComponent()->ToggleVisibility(false);
+						lightActor->SetActorHiddenInGame(true);
+						lightActor->bEnabled = false;
+					}
+				}
+				else if (IsValid(skyLigthActor) == true)
+				{
+					if (skyLigthActor->GetLightComponent() != nullptr && skyLigthActor->GetLightComponent()->bVisible == true)
+					{
+						skyLigthActor->GetLightComponent()->ToggleVisibility(false);
+						skyLigthActor->SetActorHiddenInGame(true);
+						skyLigthActor->bEnabled = false;
+					}
+				}
+			}
+			
 		}
 	}
 	GetWorld()->FlushLevelStreaming();
