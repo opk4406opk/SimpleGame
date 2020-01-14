@@ -9,6 +9,7 @@
 #include "Runtime/Engine/Classes/Engine/PostProcessVolume.h"
 #include "Runtime/Engine/Classes/Components/LightComponent.h"
 #include "Runtime/Engine/Classes/Components/SkyLightComponent.h"
+#include "Runtime/Engine/Classes/Components/ReflectionCaptureComponent.h"
 
 void AInGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
@@ -98,11 +99,13 @@ void AInGameMode::TestAAMethod(EGameAntialiasingMethod methodType)
 
 void AInGameMode::LoadOtherLevel()
 {
+	DisablePersistentLightings();
 	LoadLevelInstance(SimpleGameDataAsset->OhterLevel);
 }
 
 void AInGameMode::UnLoadOtherLevel()
 {
+	EnablePersistentLightings();
 	UnLoadLevelInstance(SimpleGameDataAsset->OhterLevel);
 }
 
@@ -156,9 +159,6 @@ void AInGameMode::UnLoadMidiumLevel()
 
 void AInGameMode::LoadLevelInstance(TSoftObjectPtr<UWorld> Level)
 {
-	// 새로운 레벨 비동기 로딩 전에 현재 퍼시스턴트에 존재하는 액터 저장.
-	OriginPersistentActors.Empty();
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), OriginPersistentActors);
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	if (GEngine)
 	{
@@ -209,6 +209,82 @@ void AInGameMode::UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level)
 	world->RemoveStreamingLevel(streamingLevel);
 }
 
+void AInGameMode::DisablePersistentLightings()
+{
+	DisabledPersistentActors.Empty();
+	//
+	TArray<AActor*> totalActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld()->PersistentLevel, AActor::StaticClass(), totalActors);
+	for (AActor* actor : totalActors)
+	{
+		if (SimpleGameDataAsset->bPersistentLevelLightingOff == true)
+		{
+			ASkyLight* skyLigthActor = Cast<ASkyLight>(actor);
+			ALight* lightActor = Cast<ALight>(actor);
+			APostProcessVolume* postprocessVolume = Cast<APostProcessVolume>(actor);
+			if (postprocessVolume != nullptr && postprocessVolume->bEnabled == true)
+			{
+				DisabledPersistentActors.Add(postprocessVolume);
+				postprocessVolume->bEnabled = false;
+				postprocessVolume->SetActorHiddenInGame(true);
+			}
+			else if (IsValid(lightActor) == true)
+			{
+				if (lightActor->GetLightComponent() != nullptr && lightActor->GetLightComponent()->bVisible == true)
+				{
+					DisabledPersistentActors.Add(lightActor);
+					lightActor->GetLightComponent()->ToggleVisibility(false);
+					lightActor->SetActorHiddenInGame(true);
+					lightActor->bEnabled = false;
+				}
+			}
+			else if (IsValid(skyLigthActor) == true)
+			{
+				if (skyLigthActor->GetLightComponent() != nullptr && skyLigthActor->GetLightComponent()->bVisible == true)
+				{
+					DisabledPersistentActors.Add(skyLigthActor);
+					skyLigthActor->GetLightComponent()->ToggleVisibility(false);
+					skyLigthActor->SetActorHiddenInGame(true);
+					skyLigthActor->bEnabled = false;
+				}
+			}
+		}
+	}
+}
+
+void AInGameMode::EnablePersistentLightings()
+{
+	for (AActor* actor : DisabledPersistentActors)
+	{
+		ASkyLight* skyLigthActor = Cast<ASkyLight>(actor);
+		ALight* lightActor = Cast<ALight>(actor);
+		APostProcessVolume* postprocessVolume = Cast<APostProcessVolume>(actor);
+		if (postprocessVolume != nullptr)
+		{
+			postprocessVolume->bEnabled = true;
+			postprocessVolume->SetActorHiddenInGame(false);
+		}
+		else if (IsValid(lightActor) == true)
+		{
+			if (lightActor->GetLightComponent() != nullptr)
+			{
+				lightActor->GetLightComponent()->ToggleVisibility(true);
+				lightActor->SetActorHiddenInGame(false);
+				lightActor->bEnabled = true;
+			}
+		}
+		else if (IsValid(skyLigthActor) == true)
+		{
+			if (skyLigthActor->GetLightComponent() != nullptr)
+			{
+				skyLigthActor->GetLightComponent()->ToggleVisibility(true);
+				skyLigthActor->SetActorHiddenInGame(false);
+				skyLigthActor->bEnabled = true;
+			}
+		}
+	}
+}
+
 void AInGameMode::LoadSubLevelStream()
 {
 	FLatentActionInfo LatentInfo;
@@ -248,21 +324,15 @@ void AInGameMode::OnFinishLoadSubLevel()
 			GEngine->AddOnScreenDebugMessage(-1, 99999.0f, FColor::Green, TEXT("Finish Stream Sub level..."));
 		}
 		UserInterfaceWidget->SetLogText(FString("Finish Stream Sub level..."));
+
 		//
-		
-		TArray<AActor*> newLevelActors;
+		//USkyLightComponent::UpdateSkyCaptureContents(GetWorld());
+		//UReflectionCaptureComponent::UpdateReflectionCaptureContents(GetWorld());
+		//
+
 		TArray<AActor*> totalActors;
 		UGameplayStatics::GetAllActorsOfClass(CurrentLevelStreaming->GetLoadedLevel(), AActor::StaticClass(), totalActors);
 		for (AActor* actor : totalActors)
-		{
-			int32 result = OriginPersistentActors.Find(actor);
-			if (result == INDEX_NONE)
-			{
-				newLevelActors.Add(actor);
-			}
-		}
-
-		for (AActor* actor : newLevelActors)
 		{
 			AGamePlayerCharacter* gamePlayerCharacter = Cast<AGamePlayerCharacter>(actor);
 			if (gamePlayerCharacter == nullptr)
@@ -281,37 +351,18 @@ void AInGameMode::OnFinishLoadSubLevel()
 				gamePlayerCharacter->PossessedBy(GetWorld()->GetFirstPlayerController());
 			}
 
-			if (SimpleGameDataAsset->bNewLevelAllLigthOff == true)
+			/*ASkyLight* skyLight = Cast<ASkyLight>(actor);
+			if (IsValid(skyLight) == true)
 			{
-				ASkyLight* skyLigthActor = Cast<ASkyLight>(actor);
-				ALight* lightActor = Cast<ALight>(actor);
-				APostProcessVolume* postprocessVolume = Cast<APostProcessVolume>(actor);
-				if (postprocessVolume != nullptr && postprocessVolume->bEnabled == true)
+				USkyLightComponent* lightComp = skyLight->GetLightComponent();
+				if (IsValid(lightComp) == true)
 				{
-					postprocessVolume->bEnabled = false;
-					postprocessVolume->SetActorHiddenInGame(true);
+					// recapture는 hitch 유발 가능성이 높음.
+					lightComp->RecaptureSky();
 				}
-				else if (IsValid(lightActor) == true)
-				{
-					if (lightActor->GetLightComponent() != nullptr && lightActor->GetLightComponent()->bVisible == true)
-					{
-						lightActor->GetLightComponent()->ToggleVisibility(false);
-						lightActor->SetActorHiddenInGame(true);
-						lightActor->bEnabled = false;
-					}
-				}
-				else if (IsValid(skyLigthActor) == true)
-				{
-					if (skyLigthActor->GetLightComponent() != nullptr && skyLigthActor->GetLightComponent()->bVisible == true)
-					{
-						skyLigthActor->GetLightComponent()->ToggleVisibility(false);
-						skyLigthActor->SetActorHiddenInGame(true);
-						skyLigthActor->bEnabled = false;
-					}
-				}
-			}
-			
+			}*/
 		}
+		
 	}
 	GetWorld()->FlushLevelStreaming();
 }

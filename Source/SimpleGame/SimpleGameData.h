@@ -35,5 +35,5 @@ public:
 	
 	// configs
 	UPROPERTY(EditDefaultsOnly)
-	bool bNewLevelAllLigthOff = true;
+	bool bPersistentLevelLightingOff = true;
 };

@@ -58,6 +58,9 @@ private:
 	void LoadLevelInstance(TSoftObjectPtr<UWorld> Level);
 	void UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level);
 
+	void DisablePersistentLightings();
+	void EnablePersistentLightings();
+
 	void LoadSubLevelStream();
 	void UnLoadSubLevelStream();
 	UFUNCTION()
@@ -78,5 +81,5 @@ private:
 	TScriptDelegate<FWeakObjectPtr> OnFinishLoadSubLevelDelegate;
 	//
 	UPROPERTY(Transient)
-	TArray<AActor*> OriginPersistentActors;
+	TArray<AActor*> DisabledPersistentActors;
 };
