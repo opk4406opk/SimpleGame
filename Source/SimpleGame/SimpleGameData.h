@@ -17,17 +17,9 @@ class SIMPLEGAME_API USimpleGameData : public UDataAsset
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UWorld> OhterLevel;
+	TSoftObjectPtr<UWorld> DynamicShadowLevel;
 	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UWorld> SimpleLevel;
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UWorld> MidiumLevel;
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UWorld> BigLargeLevel;
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UWorld> LS_SimpleLevel;
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UWorld> DefaultInGameLevel;
+	TSoftObjectPtr<UWorld> WaterLevel;
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AGamePlayerCharacter> GamePlayerCharacterClass;
 	UPROPERTY(EditDefaultsOnly)

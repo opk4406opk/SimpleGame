@@ -33,27 +33,11 @@ public:
 	UFUNCTION(Exec)
 	void TestAAMethod(EGameAntialiasingMethod methodType);
 	// Level 로딩 테스트.
-	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void LoadOtherLevel();
-	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void UnLoadOtherLevel();
-	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void LoadSimpleLevelWithLS(bool IncludeLS);
-	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void UnLoadSimpleLevelWithLS(bool IncludeLS);
-	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void LoadSubStreamOtherLevel();
-	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void UnLoadSubStreamOtherLevel();
-
-	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void LoadLargeLevel();
-	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void UnLoadLargeLevel();
-	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void LoadMidiumLevel();
-	UFUNCTION(BlueprintCallable, Category = "TEST")
-	void UnLoadMidiumLevel();
+	UFUNCTION(BlueprintCallable, Category = "Level Loading")
+	void LoadOtherLevel(ELevelType LevelType);
+	UFUNCTION(BlueprintCallable, Category = "Level Loading")
+	void UnLoadOtherLevel(ELevelType LevelType);
+	
 private:
 	void LoadLevelInstance(TSoftObjectPtr<UWorld> Level);
 	void UnLoadLevelInstance(TSoftObjectPtr<UWorld> Level);

@@ -97,64 +97,43 @@ void AInGameMode::TestAAMethod(EGameAntialiasingMethod methodType)
 	antialiasingMethod->Set((float)methodType);
 }
 
-void AInGameMode::LoadOtherLevel()
+void AInGameMode::LoadOtherLevel(ELevelType LevelType)
 {
-	DisablePersistentLightings();
-	LoadLevelInstance(SimpleGameDataAsset->OhterLevel);
-}
-
-void AInGameMode::UnLoadOtherLevel()
-{
-	EnablePersistentLightings();
-	UnLoadLevelInstance(SimpleGameDataAsset->OhterLevel);
-}
-
-void AInGameMode::LoadSimpleLevelWithLS(bool IncludeLS)
-{
-	LoadLevelInstance(SimpleGameDataAsset->SimpleLevel);
-	if (IncludeLS == true)
+	switch (LevelType)
 	{
-		LoadLevelInstance(SimpleGameDataAsset->LS_SimpleLevel);
+	case ELevelType::None:
+		break;
+	case ELevelType::DynamicShadow:
+		DisablePersistentLightings();
+		LoadLevelInstance(SimpleGameDataAsset->DynamicShadowLevel);
+		break;
+	case ELevelType::Water:
+		DisablePersistentLightings();
+		LoadLevelInstance(SimpleGameDataAsset->WaterLevel);
+		break;
+	default:
+		break;
 	}
 }
 
-void AInGameMode::UnLoadSimpleLevelWithLS(bool IncludeLS)
+void AInGameMode::UnLoadOtherLevel(ELevelType LevelType)
 {
-	UnLoadLevelInstance(SimpleGameDataAsset->SimpleLevel);
-	if (IncludeLS == true)
+	
+	switch (LevelType)
 	{
-		UnLoadLevelInstance(SimpleGameDataAsset->LS_SimpleLevel);
+	case ELevelType::None:
+		break;
+	case ELevelType::DynamicShadow:
+		EnablePersistentLightings();
+		UnLoadLevelInstance(SimpleGameDataAsset->DynamicShadowLevel);
+		break;
+	case ELevelType::Water:
+		EnablePersistentLightings();
+		UnLoadLevelInstance(SimpleGameDataAsset->WaterLevel);
+		break;
+	default:
+		break;
 	}
-}
-
-void AInGameMode::LoadSubStreamOtherLevel()
-{
-	LoadSubLevelStream();
-}
-
-void AInGameMode::UnLoadSubStreamOtherLevel()
-{
-	UnLoadSubLevelStream();
-}
-
-void AInGameMode::LoadLargeLevel()
-{
-	LoadLevelInstance(SimpleGameDataAsset->BigLargeLevel);
-}
-
-void AInGameMode::UnLoadLargeLevel()
-{
-	UnLoadLevelInstance(SimpleGameDataAsset->BigLargeLevel);
-}
-
-void AInGameMode::LoadMidiumLevel()
-{
-	LoadLevelInstance(SimpleGameDataAsset->MidiumLevel);
-}
-
-void AInGameMode::UnLoadMidiumLevel()
-{
-	UnLoadLevelInstance(SimpleGameDataAsset->MidiumLevel);
 }
 
 void AInGameMode::LoadLevelInstance(TSoftObjectPtr<UWorld> Level)
@@ -288,8 +267,8 @@ void AInGameMode::EnablePersistentLightings()
 void AInGameMode::LoadSubLevelStream()
 {
 	FLatentActionInfo LatentInfo;
-	UGameplayStatics::LoadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), true, false, LatentInfo);
-	ULevelStreaming* level = UGameplayStatics::GetStreamingLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName());
+	UGameplayStatics::LoadStreamLevel(GetWorld(), *SimpleGameDataAsset->DynamicShadowLevel.GetAssetName(), true, false, LatentInfo);
+	ULevelStreaming* level = UGameplayStatics::GetStreamingLevel(GetWorld(), *SimpleGameDataAsset->DynamicShadowLevel.GetAssetName());
 	if (level == nullptr)
 	{
 		if (GEngine)
@@ -311,7 +290,7 @@ void AInGameMode::LoadSubLevelStream()
 void AInGameMode::UnLoadSubLevelStream()
 {
 	FLatentActionInfo LatentInfo;
-	UGameplayStatics::UnloadStreamLevel(GetWorld(), *SimpleGameDataAsset->OhterLevel.GetAssetName(), LatentInfo, false);
+	UGameplayStatics::UnloadStreamLevel(GetWorld(), *SimpleGameDataAsset->DynamicShadowLevel.GetAssetName(), LatentInfo, false);
 }
 
 void AInGameMode::OnFinishLoadSubLevel()

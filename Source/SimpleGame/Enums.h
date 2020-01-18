@@ -35,3 +35,11 @@ enum class EGameMSAASamplingValue : uint8
 	MSAA_4x = 4,
 	MSAA_8x = 8
 };
+
+UENUM(BlueprintType)
+enum class ELevelType : uint8
+{
+	None,
+	DynamicShadow,
+	Water,
+};
