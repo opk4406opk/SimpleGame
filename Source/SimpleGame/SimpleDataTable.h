@@ -5,7 +5,7 @@
 #include "SimpleDataTable.generated.h"
 
 USTRUCT(BlueprintType)
-struct FUserInformation : public FTableRowBase
+struct FSimpleDataTable : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 public:
