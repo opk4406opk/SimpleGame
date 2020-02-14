@@ -28,10 +28,13 @@ void AInGameMode::StartPlay()
 	Super::StartPlay();
 	UE_LOG(LogTemp, Display, TEXT("AInGameMode::StartPlay"));
 	//
-	GamePlayerInstance = GetWorld()->SpawnActor<AGamePlayerCharacter>(SimpleGameDataAsset->GamePlayerCharacterClass.Get(), FVector(0, 0, 0), FRotator(0, 0, 0));
+	if (IsValid(GamePlayerInstance) == true)
+	{
+		GamePlayerInstance = GetWorld()->SpawnActor<AGamePlayerCharacter>(SimpleGameDataAsset->GamePlayerCharacterClass.Get(), FVector(0, 0, 0), FRotator(0, 0, 0));
 #if UE_EDITOR
-	GamePlayerInstance->SetActorLabel(*FString("GamePlayerCharacter_Instance"));
+		GamePlayerInstance->SetActorLabel(*FString("GamePlayerCharacter_Instance"));
 #endif
+	}
 }
 
 void AInGameMode::Tick(float DeltaSeconds)
