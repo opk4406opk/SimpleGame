@@ -4,14 +4,21 @@
 	"Category": "",
 	"Description": "",
 	"Modules": [
-		{
-			"Name": "SimpleGame",
-			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"Engine",
-				"UMG"
-			]
-		}
+    {
+      "Name": "SimpleGame",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "AdditionalDependencies": [
+        "Engine",
+        "UMG",
+        "Slate",
+        "SlateCore"
+      ]
+    },
+    {
+      "Name" : "SimpleEditor",
+      "Type": "Editor",
+      "LoadingPhase" :  "PostEngineInit"
+    }
 	]
 }

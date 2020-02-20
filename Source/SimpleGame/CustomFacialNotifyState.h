@@ -6,6 +6,7 @@
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "Runtime/Engine/Classes/Curves/CurveFloat.h"
 #include "Runtime/Engine/Classes/Animation/AnimComposite.h"
+#include "SimpleStructs.h"
 #include "CustomFacialNotifyState.generated.h"
 
 /**
@@ -18,9 +19,7 @@ class SIMPLEGAME_API UCustomFacialNotifyState : public UAnimNotifyState
 	
 public:
 	UPROPERTY(EditAnywhere)
-	FRuntimeFloatCurve FacialCurve;
-	UPROPERTY(EditAnywhere)
-	UAnimComposite* FacialAnimComposite;
+	TArray<FSimpleAnimRowHandle> CompositeAnimRowHandles;
 	UPROPERTY(EditAnywhere)
 	float StartTime = 0.0f;
 public:

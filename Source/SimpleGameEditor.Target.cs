@@ -9,6 +9,6 @@ public class SimpleGameEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 
-		ExtraModuleNames.AddRange( new string[] { "SimpleGame" } );
+		ExtraModuleNames.AddRange( new string[] { "SimpleGame", "SimpleEditor" } );
 	}
 }

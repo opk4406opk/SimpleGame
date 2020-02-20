@@ -1,34 +1,34 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Runtime/Engine/Classes/Components/SkeletalMeshComponent.h"
 #include "CustomFacialNotifyState.h"
+#include "Runtime/Engine/Classes/Components/SkeletalMeshComponent.h"
+
 
 void UCustomFacialNotifyState::NotifyBegin(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation, float TotalDuration)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration);
 	//
-	if (IsValid(FacialAnimComposite) == true)
+	Animation->RawCurveData.FloatCurves.Empty();
+	//
+	for (FSimpleAnimRowHandle animRowHandle : CompositeAnimRowHandles)
 	{
-		const FRawCurveTracks& curveData = FacialAnimComposite->GetCurveData();
-		for (FFloatCurve floatCurve : curveData.FloatCurves)
+		const bool bValidRowHandle = IsValid(animRowHandle.FacialAnimComposite) == true && animRowHandle.FacialCurve.GetRichCurve() != nullptr;
+		if (bValidRowHandle == true)
 		{
-			TArray<float> outTimes;
-			TArray<float> outValues;
-			floatCurve.GetKeys(outTimes, outValues);
-			// Offset. (notify state의 시작시작을 offset으로 해서 더해준다.)
-			for (float& curveTime : outTimes)
+			FFloatCurve newFloatCurve;
+			for (FRichCurveKey curveKey : animRowHandle.FacialCurve.GetRichCurve()->Keys)
 			{
-				curveTime += StartTime;
-			}
-			// Reset.
-			floatCurve.FloatCurve.Reset();
-			// Update.
-			for (int32 idx = 0; idx < outTimes.Num(); ++idx)
-			{
-				floatCurve.UpdateOrAddKey(outValues[idx], outTimes[idx]);
+				const float offsetedTime = curveKey.Time + StartTime;
+				newFloatCurve.Name = animRowHandle.CurveName;
+				newFloatCurve.FloatCurve.UpdateOrAddKey(offsetedTime, curveKey.Value);
 			}
 			//
-			Animation->RawCurveData.FloatCurves.Add(floatCurve);
+			if (newFloatCurve.FloatCurve.GetNumKeys() > 0)
+			{
+				// 1) setting float curve.
+				Animation->RawCurveData.FloatCurves.Add(newFloatCurve);
+				// 2) update set of (name, flaotCurves)
+				Animation->RawCurveData.AddCurveData(animRowHandle.CurveName);
+			}
 		}
 	}
 }
@@ -52,6 +52,6 @@ void UCustomFacialNotifyState::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& Con
 void UCustomFacialNotifyState::ResetMorphDatas(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation)
 {
 	// clear morphtarget's curve values.
-	if(IsValid(MeshComp) == true) MeshComp->ClearMorphTargets();
-	if(IsValid(Animation) == true) Animation->RawCurveData.FloatCurves.Empty();
+	if (IsValid(MeshComp) == true) MeshComp->ClearMorphTargets();
+	if (IsValid(Animation) == true) Animation->RawCurveData.FloatCurves.Empty();
 }
