@@ -1,24 +1,24 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.23",
+	"EngineAssociation": "4.24",
 	"Category": "",
 	"Description": "",
 	"Modules": [
-    {
-      "Name": "SimpleGame",
-      "Type": "Runtime",
-      "LoadingPhase": "Default",
-      "AdditionalDependencies": [
-        "Engine",
-        "UMG",
-        "Slate",
-        "SlateCore"
-      ]
-    },
-    {
-      "Name" : "SimpleEditor",
-      "Type": "Editor",
-      "LoadingPhase" :  "PostEngineInit"
-    }
+		{
+			"Name": "SimpleGame",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG",
+				"Slate",
+				"SlateCore"
+			]
+		},
+		{
+			"Name": "SimpleEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit"
+		}
 	]
 }
