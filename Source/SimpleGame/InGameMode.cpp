@@ -39,21 +39,6 @@ void AInGameMode::StartPlay()
 	}
 }
 
-void AInGameMode::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-
-	if (GEngine)
-	{
-		APlayerController* playerController = GetWorld()->GetFirstPlayerController();
-		float mouseScreenX, mouseScreenY;
-		playerController->GetMousePosition(mouseScreenX, mouseScreenY);
-		GEngine->ClearOnScreenDebugMessages();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, 
-			FString::Printf(TEXT("Mouse Screen Location is: X : %d, Y : %d"), mouseScreenX, mouseScreenY ));
-	}
-}
-
 void AInGameMode::TestAAMethod(EGameAntialiasingMethod methodType)
 {
 	if (GEngine)

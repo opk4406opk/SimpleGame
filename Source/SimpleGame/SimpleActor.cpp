@@ -5,6 +5,7 @@
 #include "InGameMode.h"
 #include "SimpleUserWidget.h"
 #include "Runtime/UMG/Public/Components/CanvasPanelSlot.h"
+#include "Runtime/Engine/Public/UnrealEngine.h"
 
 // Sets default values
 ASimpleActor::ASimpleActor()
@@ -36,6 +37,22 @@ void ASimpleActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (bTicking == false) return;
+
+	if (GEngine)
+	{
+		APlayerController* playerController = GetWorld()->GetFirstPlayerController();
+		float mouseScreenX, mouseScreenY;
+		const bool bValid = playerController->GetMousePosition(mouseScreenX, mouseScreenY);
+		if (bValid == true)
+		{
+			GEngine->ClearOnScreenDebugMessages();
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, FString::Printf(TEXT("Mouse Screen Location is: X : %d, Y : %d"), mouseScreenX, mouseScreenY));
+		
+			int32 viewportSizeX, viewportSizeY;
+			playerController->GetViewportSize(viewportSizeX, viewportSizeY);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Viewport: X : %d, Y : %d"), viewportSizeX, viewportSizeY));
+		}
+	}
 	//
 	AInGameMode* ingameMode = Cast<AInGameMode>(GetWorld()->GetAuthGameMode());
 	if (IsValid(ingameMode) == true && IsValid(CapsuleComponent) == true)
@@ -49,10 +66,12 @@ void ASimpleActor::Tick(float DeltaTime)
 		{
 			if (IsValid(hud->MaxExtentWidget) == true)
 			{
+				
 				FVector2D maxExtentScreenPos;
 				playerController->ProjectWorldLocationToScreen(boxBound.Max, maxExtentScreenPos);
+				FVector2D absPos = hud->MaxExtentWidget->GetCachedGeometry().LocalToAbsolute(maxExtentScreenPos);
 				UCanvasPanelSlot* panelSlot = Cast<UCanvasPanelSlot>(hud->MaxExtentWidget->Slot);
-				panelSlot->SetPosition(maxExtentScreenPos);
+				panelSlot->SetPosition(absPos);
 				
 			}
 
@@ -60,18 +79,20 @@ void ASimpleActor::Tick(float DeltaTime)
 			{
 				FVector2D minExtentScreenPos;
 				playerController->ProjectWorldLocationToScreen(boxBound.Min, minExtentScreenPos);
+				FVector2D absPos = hud->MinExtentWidget->GetCachedGeometry().LocalToAbsolute(minExtentScreenPos);
 				UCanvasPanelSlot* panelSlot = Cast<UCanvasPanelSlot>(hud->MinExtentWidget->Slot);
-				panelSlot->SetPosition(minExtentScreenPos);
+				panelSlot->SetPosition(absPos);
 			}
 
 			if (IsValid(hud->PivotWidget) == true)
 			{
 				FVector2D pivotScreenPos;
 				playerController->ProjectWorldLocationToScreen(GetTransform().GetLocation(), pivotScreenPos);
-				FVector2D localPos = hud->PivotWidget->GetCachedGeometry().AbsoluteToLocal(pivotScreenPos);
+				FVector2D absPos = hud->PivotWidget->GetCachedGeometry().LocalToAbsolute(pivotScreenPos);
 				UCanvasPanelSlot* panelSlot = Cast<UCanvasPanelSlot>(hud->PivotWidget->Slot);
-				panelSlot->SetPosition(localPos);
+				panelSlot->SetPosition(absPos);
 			}
+
 		}
 	}
 }
