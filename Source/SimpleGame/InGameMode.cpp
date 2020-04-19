@@ -14,10 +14,12 @@
 void AInGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
+	//
 	UUserWidget* instancedWidget = CreateWidget(GetWorld(), UserInterfaceWidgetClass);
 	UserInterfaceWidget = Cast<USimpleUserWidget>(instancedWidget);
 	if (UserInterfaceWidget != nullptr)
 	{
+		UserInterfaceWidget->Init();
 		UserInterfaceWidget->AddToViewport();
 	}
 	UE_LOG(LogTemp, Display, TEXT("AInGameMode::InitGame"));
@@ -40,6 +42,16 @@ void AInGameMode::StartPlay()
 void AInGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (GEngine)
+	{
+		APlayerController* playerController = GetWorld()->GetFirstPlayerController();
+		float mouseScreenX, mouseScreenY;
+		playerController->GetMousePosition(mouseScreenX, mouseScreenY);
+		GEngine->ClearOnScreenDebugMessages();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange, 
+			FString::Printf(TEXT("Mouse Screen Location is: X : %d, Y : %d"), mouseScreenX, mouseScreenY ));
+	}
 }
 
 void AInGameMode::TestAAMethod(EGameAntialiasingMethod methodType)
@@ -137,6 +149,28 @@ void AInGameMode::UnLoadOtherLevel(ELevelType LevelType)
 	default:
 		break;
 	}
+}
+
+void AInGameMode::InitSettingExtentWidgets(UWidget* MaxExtent, UWidget* MinExtent)
+{
+	if (IsValid(UserInterfaceWidget) == true)
+	{
+		UserInterfaceWidget->MaxExtentWidget = MaxExtent;
+		UserInterfaceWidget->MinExtentWidget = MinExtent;
+	}
+}
+
+void AInGameMode::InitSettingActorPivotWidget(UWidget* PivotWidget)
+{
+	if (IsValid(UserInterfaceWidget) == true)
+	{
+		UserInterfaceWidget->PivotWidget = PivotWidget;
+	}
+}
+
+USimpleUserWidget* AInGameMode::GetUserHUDWidget()
+{
+	return UserInterfaceWidget;
 }
 
 void AInGameMode::LoadLevelInstance(TSoftObjectPtr<UWorld> Level)

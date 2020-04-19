@@ -10,3 +10,8 @@ void USimpleUserWidget::SetLogText(FString logText)
 		LogTextBlock->SetText(FText::FromString(logText));
 	}
 }
+
+void USimpleUserWidget::Init()
+{
+	
+}

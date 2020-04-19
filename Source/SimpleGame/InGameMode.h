@@ -37,6 +37,13 @@ public:
 	void LoadOtherLevel(ELevelType LevelType);
 	UFUNCTION(BlueprintCallable, Category = "Level Loading")
 	void UnLoadOtherLevel(ELevelType LevelType);
+
+	UFUNCTION(BlueprintCallable, Category = "TEST_Function")
+	void InitSettingExtentWidgets(UWidget* MaxExtent, UWidget* MinExtent);
+	UFUNCTION(BlueprintCallable, Category = "TEST_Function")
+	void InitSettingActorPivotWidget(UWidget* PivotWidget);
+
+	USimpleUserWidget* GetUserHUDWidget();
 	
 private:
 	void LoadLevelInstance(TSoftObjectPtr<UWorld> Level);

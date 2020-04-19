@@ -17,9 +17,14 @@ class SIMPLEGAME_API USimpleUserWidget : public UUserWidget
 	GENERATED_BODY()
 public:
 	void SetLogText(FString logText);
+	void Init();
 public:
 	UPROPERTY(EditDefaultsOnly)
 	UTextBlock* LogTextBlock;
+
+	UPROPERTY(EditDefaultsOnly) UWidget* MaxExtentWidget = nullptr;
+	UPROPERTY(EditDefaultsOnly) UWidget* MinExtentWidget = nullptr;
+	UPROPERTY(EditDefaultsOnly) UWidget* PivotWidget = nullptr;
 private:
 	
 };
