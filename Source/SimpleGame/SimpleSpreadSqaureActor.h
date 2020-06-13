@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Runtime/Engine/Public/UnrealEngine.h"
 #include "Runtime/Engine/Classes/Components/StaticMeshComponent.h"
 #include "SimpleSpreadSqaureActor.generated.h"
 

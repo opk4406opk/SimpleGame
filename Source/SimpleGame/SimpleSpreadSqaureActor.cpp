@@ -44,27 +44,33 @@ void ASimpleSpreadSqaureActor::Tick(float DeltaTime)
 void ASimpleSpreadSqaureActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ASimpleSpreadSqaureActor::NotifyActorBeginOverlap"));
+#if WITH_EDITOR
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("NotifyActorBeginOverlap, triggered with %s"), *OtherActor->GetActorLabel());
 	}
+#endif
 }
 
 void ASimpleSpreadSqaureActor::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ASimpleSpreadSqaureActor::NotifyActorEndOverlap"));
+#if WITH_EDITOR
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("NotifyActorEndOverlap, triggered with %s"), *OtherActor->GetActorLabel());
 	}
+#endif
 }
 
 void ASimpleSpreadSqaureActor::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ASimpleSpreadSqaureActor::NotifyHit"));
+#if WITH_EDITOR
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("NotifyHit, collide with %s"), *Other->GetActorLabel());
 	}
+#endif
 }
 

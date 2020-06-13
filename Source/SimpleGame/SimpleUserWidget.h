@@ -26,5 +26,13 @@ public:
 	UPROPERTY(EditDefaultsOnly) UWidget* MinExtentWidget = nullptr;
 	UPROPERTY(EditDefaultsOnly) UWidget* PivotWidget = nullptr;
 private:
+	bool IsMultiTouch();
 	
+protected:
+	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnTouchGesture(const FGeometry& InGeometry, const FPointerEvent& InGestureEvent) override;
+	virtual FReply NativeOnTouchStarted(const FGeometry& InGeometry, const FPointerEvent& InGestureEvent) override;
+	virtual FReply NativeOnTouchMoved(const FGeometry& InGeometry, const FPointerEvent& InGestureEvent) override;
+	virtual FReply NativeOnTouchEnded(const FGeometry& InGeometry, const FPointerEvent& InGestureEvent) override;
+
 };

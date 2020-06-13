@@ -44,10 +44,12 @@ void UCustomFacialNotifyState::NotifyEnd(USkeletalMeshComponent * MeshComp, UAni
 	ResetMorphDatas(MeshComp, Animation);
 }
 
+#if WITH_EDITOR
 void UCustomFacialNotifyState::OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent)
 {
 	Super::OnAnimNotifyCreatedInEditor(ContainingAnimNotifyEvent);
 }
+#endif
 
 void UCustomFacialNotifyState::ResetMorphDatas(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation)
 {

@@ -27,6 +27,8 @@ public:
 	virtual void NotifyTick(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation, float FrameDeltaTime) override;
 	virtual void NotifyEnd(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation) override;
 private:
+#if WITH_EDITOR
 	virtual void OnAnimNotifyCreatedInEditor(FAnimNotifyEvent& ContainingAnimNotifyEvent) override;
+#endif
 	void ResetMorphDatas(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation);
 };
