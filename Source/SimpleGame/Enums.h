@@ -42,4 +42,5 @@ enum class ELevelType : uint8
 	None,
 	DynamicShadow,
 	Water,
+	LightMap,
 };

@@ -111,7 +111,9 @@ void AInGameMode::LoadOtherLevel(ELevelType LevelType)
 		DisablePersistentLightings();
 		LoadLevelInstance(SimpleGameDataAsset->WaterLevel);
 		break;
-	default:
+	case ELevelType::LightMap:
+		DisablePersistentLightings();
+		LoadLevelInstance(SimpleGameDataAsset->LightMapLevel);
 		break;
 	}
 }
@@ -131,7 +133,9 @@ void AInGameMode::UnLoadOtherLevel(ELevelType LevelType)
 		EnablePersistentLightings();
 		UnLoadLevelInstance(SimpleGameDataAsset->WaterLevel);
 		break;
-	default:
+	case ELevelType::LightMap:
+		EnablePersistentLightings();
+		UnLoadLevelInstance(SimpleGameDataAsset->LightMapLevel);
 		break;
 	}
 }
