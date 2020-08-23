@@ -4,6 +4,8 @@
 #include "SimpleStartSceneMode.h"
 #include "SimpleGame/SimpleUserWidget.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "MobilePatchingUtils/Private/MobilePatchingLibrary.h"
+#include "Runtime/Core/Public/Misc/Paths.h"
 
 void ASimpleStartSceneMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
@@ -24,7 +26,7 @@ void ASimpleStartSceneMode::StartPlay()
 {
 	Super::StartPlay();
 	UE_LOG(LogTemp, Display, TEXT("ASimpleStartSceneMode::StartPlay"));
-	//UMobilePatchingLibrary::RequestContent();
+
 }
 
 void ASimpleStartSceneMode::OnClickStartGame()
