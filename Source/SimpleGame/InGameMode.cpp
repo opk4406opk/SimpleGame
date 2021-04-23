@@ -235,7 +235,7 @@ void AInGameMode::DisablePersistentLightings()
 			}
 			else if (IsValid(lightActor) == true)
 			{
-				if (lightActor->GetLightComponent() != nullptr && lightActor->GetLightComponent()->bVisible == true)
+				if (lightActor->GetLightComponent() != nullptr && lightActor->GetLightComponent()->GetVisibleFlag() == true)
 				{
 					DisabledPersistentActors.Add(lightActor);
 					lightActor->GetLightComponent()->ToggleVisibility(false);
@@ -245,7 +245,7 @@ void AInGameMode::DisablePersistentLightings()
 			}
 			else if (IsValid(skyLigthActor) == true)
 			{
-				if (skyLigthActor->GetLightComponent() != nullptr && skyLigthActor->GetLightComponent()->bVisible == true)
+				if (skyLigthActor->GetLightComponent() != nullptr && skyLigthActor->GetLightComponent()->GetVisibleFlag() == true)
 				{
 					DisabledPersistentActors.Add(skyLigthActor);
 					skyLigthActor->GetLightComponent()->ToggleVisibility(false);

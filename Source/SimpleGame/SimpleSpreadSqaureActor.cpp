@@ -47,7 +47,7 @@ void ASimpleSpreadSqaureActor::NotifyActorBeginOverlap(AActor* OtherActor)
 #if WITH_EDITOR
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("NotifyActorBeginOverlap, triggered with %s"), *OtherActor->GetActorLabel());
+		//GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("NotifyActorBeginOverlap, triggered with %s"), *OtherActor->GetActorLabel());
 	}
 #endif
 }
@@ -58,7 +58,7 @@ void ASimpleSpreadSqaureActor::NotifyActorEndOverlap(AActor* OtherActor)
 #if WITH_EDITOR
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("NotifyActorEndOverlap, triggered with %s"), *OtherActor->GetActorLabel());
+		//GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("NotifyActorEndOverlap, triggered with %s"), *OtherActor->GetActorLabel());
 	}
 #endif
 }
@@ -69,7 +69,7 @@ void ASimpleSpreadSqaureActor::NotifyHit(class UPrimitiveComponent* MyComp, AAct
 #if WITH_EDITOR
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("NotifyHit, collide with %s"), *Other->GetActorLabel());
+		//GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("NotifyHit, collide with %s"), *Other->GetActorLabel());
 	}
 #endif
 }
