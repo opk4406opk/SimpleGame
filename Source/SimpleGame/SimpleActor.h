@@ -24,7 +24,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	virtual UFUNCTION() void OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted);
+	virtual UAnimMontage* PlayAnimationSequence(UAnimSequenceBase* Asset, float BlendInTime = 0.25f, float BlendOutTime = 0.25f, float InPlayRate = 1.f, int32 LoopCount = 1, float InTimeToStartMontageAt = 0.f);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

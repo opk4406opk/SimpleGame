@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Runtime/Engine/Classes/Components/SkeletalMeshComponent.h"
+#include "Runtime/Engine/Classes/Components/CapsuleComponent.h"
 #include "KojeomGeneralActor.generated.h"
 
 UCLASS()
@@ -22,5 +24,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	
+private:
+	UPROPERTY(Transient) USkeletalMeshComponent* MeshComponent = nullptr;
+	UPROPERTY(Transient) UCapsuleComponent* CapsuleComponent = nullptr;
 };

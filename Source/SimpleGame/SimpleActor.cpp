@@ -33,6 +33,49 @@ void ASimpleActor::BeginPlay()
 	bTicking = true;
 }
 
+void ASimpleActor::OnAnimationEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+
+}
+
+UAnimMontage* ASimpleActor::PlayAnimationSequence(UAnimSequenceBase* Asset, float BlendInTime /*= 0.25f*/, float BlendOutTime /*= 0.25f*/, float InPlayRate /*= 1.f*/, int32 LoopCount /*= 1*/, float InTimeToStartMontageAt /*= 0.f*/)
+{
+	check(MeshComponent != nullptr);
+
+	float blendOutTriggerTime = -1.0f;
+
+	// BlendOutTime이 0보다 클 경우 Blend out을 해야 하는데, 그때는 Anim이 끝난 이후 진행되게
+	if (BlendOutTime > 0.0f)
+	{
+		blendOutTriggerTime = 0.0f;
+	}
+
+	UAnimMontage* montage = nullptr;
+	if (MeshComponent->GetAnimInstance() != nullptr)
+	{
+		montage = MeshComponent->GetAnimInstance()->PlaySlotAnimationAsDynamicMontage(Asset, FAnimSlotGroup::DefaultSlotName, BlendInTime, BlendOutTime, InPlayRate, LoopCount, blendOutTriggerTime, InTimeToStartMontageAt);
+	}
+	// blend out time이 0 이하일때는 blend out을 하지 않는다는 의미이므로 바로 EndDelegate에 연결
+	// 아니면 BlendOut되는 시점을 anim end시점으로 설정
+// 	if(BlendOutTime <= 0.0f)
+// 	{
+// 		FOnMontageEnded animDelegate;
+// 		animDelegate.BindUObject(this, &ALobbyCreature::OnAnimationEnded);
+// 		MeshComponent->GetAnimInstance()->Montage_SetEndDelegate(animDelegate, montage);
+// 	}
+// 	else
+	{
+		if (MeshComponent->GetAnimInstance() != nullptr)
+		{
+			FOnMontageBlendingOutStarted animDelegate;
+			animDelegate.BindUObject(this, &ASimpleActor::OnAnimationEnded);
+			MeshComponent->GetAnimInstance()->Montage_SetBlendingOutDelegate(animDelegate, montage);
+		}
+	}
+
+	return montage;
+}
+
 // Called every frame
 void ASimpleActor::Tick(float DeltaTime)
 {
